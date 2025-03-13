@@ -4,7 +4,7 @@ export const log = (...messages: string[]) => {
 
 export const debug = (...messages: string[]) => {
   const location = new Error().stack?.split("\n")[2]?.trim() ?? "unknown";
-  console.debug(messages.map((m) => `[${location}] ${m}`));
+  console.debug(...messages.map((m) => `[${location}] ${m}`));
 };
 
 export const logError = (...messages: string[]) => {
