@@ -1,0 +1,49 @@
+# 파일 경로를 .github/workflows/ci.yml로 수정해야 합니다
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js ${{ matrix.node-version }} 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v4
+
+      - name: pnpm 캐시 설정
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: 린트 검사
+        run: pnpm lint
+
+      - name: 테스트 실행
+        run: pnpm test
+
+      - name: 빌드 체크
+        run: pnpm build
