@@ -12,9 +12,7 @@ export async function BlogParserPage({
 
   return (
     <PageLayout>
-      <Typography.H1 className="text-center">
-        Blog To Video Parser
-      </Typography.H1>
+      <Typography.H1 className="text-center">Blog To Video</Typography.H1>
       <Separator className="my-8" />
 
       <BlogParser url={url} />
