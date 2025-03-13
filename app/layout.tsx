@@ -1,10 +1,15 @@
 import "@/src/client/app/style/globals.css";
 import { QueryProvider } from "@/src/client/shared/lib/react-query/QueryProvider";
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
+import { Geist_Mono, Noto_Sans_KR } from "next/font/google";
 
 const notoSansKR = Noto_Sans_KR({
-  variable: "--font-noto-sans-kr",
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -20,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${notoSansKR.variable} antialiased`}>
+      <body
+        className={`${notoSansKR.variable} ${geistMono.variable} antialiased`}
+      >
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
