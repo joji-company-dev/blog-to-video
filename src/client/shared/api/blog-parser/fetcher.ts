@@ -1,5 +1,5 @@
 import { generateFetcher } from "@/src/client/shared/lib/api-fetcher/generateFetcher";
-import { BlogContent } from "@/src/server/blog-parser/blog-parser.model";
+import { BlogContent } from "@/src/common/model/blog-parser.model";
 
 const BASE_URL =
   typeof window !== "undefined" ? window.location.origin : process.env.API_URL;

@@ -1,5 +1,3 @@
-import puppeteer, { Browser, ElementHandle, Page } from "puppeteer";
-import { BlogParser } from "./blog-parser.interface";
 import {
   BlogBlock,
   blogBlockModel,
@@ -8,9 +6,11 @@ import {
   imageBlockModel,
   TextBlock,
   textBlockModel,
-} from "./blog-parser.model";
-import { mergeLineBreak, mergeSpace } from "../utils/text.utils";
+} from "@/src/common/model/blog-parser.model";
+import puppeteer, { Browser, ElementHandle, Page } from "puppeteer";
 import { log } from "../utils/logger.utils";
+import { mergeLineBreak, mergeSpace } from "../utils/text.utils";
+import { BlogParser } from "./blog-parser.interface";
 
 export class NaverBlogParser implements BlogParser {
   private isInitialized: boolean = false;

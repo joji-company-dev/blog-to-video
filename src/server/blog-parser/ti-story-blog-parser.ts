@@ -1,13 +1,13 @@
-import puppeteer, { Browser, ElementHandle, Page } from "puppeteer";
-import { BlogParser } from "./blog-parser.interface";
 import {
   BlogBlock,
   BlogContent,
   ImageBlock,
   TextBlock,
-} from "./blog-parser.model";
-import { mergeLineBreak } from "../utils/text.utils";
+} from "@/src/common/model/blog-parser.model";
+import puppeteer, { Browser, ElementHandle, Page } from "puppeteer";
 import { log } from "../utils/logger.utils";
+import { mergeLineBreak } from "../utils/text.utils";
+import { BlogParser } from "./blog-parser.interface";
 
 export class TiStoryBlogParser implements BlogParser {
   private isInitialized: boolean = false;

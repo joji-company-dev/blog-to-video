@@ -1,4 +1,4 @@
-import { BlogContent } from "./blog-parser.model";
+import { BlogContent } from "@/src/common/model/blog-parser.model";
 
 export interface BlogParser {
   initialize(): Promise<void>;
