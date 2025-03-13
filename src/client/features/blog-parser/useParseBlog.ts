@@ -6,6 +6,7 @@ export function useParseBlog(url: string) {
     queryKey: ["blog-parser", url],
     queryFn: () =>
       apiFetchers.blogParser.blogParserFetcher({ queryParam: { url } }),
+    retry: 2,
   });
 
   return {
