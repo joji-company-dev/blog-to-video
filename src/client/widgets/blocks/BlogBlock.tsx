@@ -27,11 +27,29 @@ export function BlogBlock({
         <ImageBlock block={block} isEditable={isEditable} onChange={onChange} />
       );
     case "singleImageAndSingleText":
-      return <SingleImageAndSingleTextBlock block={block} />;
+      return (
+        <SingleImageAndSingleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
     case "singleImageAndMultipleText":
-      return <SingleImageAndMultipleTextBlock block={block} />;
+      return (
+        <SingleImageAndMultipleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
     case "multipleImageAndSingleText":
-      return <MultipleImageAndSingleTextBlock block={block} />;
+      return (
+        <MultipleImageAndSingleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
     default:
       throw new Error(`Unknown block: ${JSON.stringify(block)}`);
   }

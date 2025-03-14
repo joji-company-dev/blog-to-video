@@ -23,7 +23,7 @@ export function ReadOnlyTextBlock({
   block,
 }: Omit<TextBlockProps<false>, "onChange" | "isEditable">) {
   return (
-    <div className="rounded-lg border p-2">
+    <div className="p-2">
       <Typography.P>{block.value}</Typography.P>
     </div>
   );
@@ -34,7 +34,7 @@ export function EditableTextBlock({
   onChange,
 }: Omit<TextBlockProps<true>, "isEditable">) {
   return (
-    <div className="rounded-lg border p-2 space-y-2">
+    <div className="p-2">
       <Textarea
         value={block.value}
         onChange={(e) => onChange?.({ ...block, value: e.target.value })}

@@ -24,7 +24,7 @@ export function ReadOnlyImageBlock({
   block,
 }: Omit<ImageBlockProps<false>, "isEditable" | "onChange">) {
   return (
-    <div className="rounded-lg border p-2">
+    <div className="p-2">
       <img src={block.value.src} alt="이미지" />
     </div>
   );
@@ -64,7 +64,7 @@ export function EditableImageBlock({
   };
 
   return (
-    <div className="rounded-lg border p-2">
+    <div className="p-2">
       <img
         src={block.value.src}
         alt="이미지"
