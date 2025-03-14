@@ -37,17 +37,19 @@ export function BlogUrlForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>블로그 URL</FormLabel>
-              <Input placeholder="블로그 URL을 입력하세요" {...field} />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
+        <div className="space-y-2 md:space-y-4">
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>블로그 URL</FormLabel>
+                <Input placeholder="블로그 URL을 입력하세요" {...field} />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">다음</Button>
+        </div>
       </form>
     </Form>
   );
