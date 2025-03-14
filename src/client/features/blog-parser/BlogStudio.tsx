@@ -2,6 +2,7 @@
 
 import { PATHS } from "@/src/client/app/routes/paths";
 import { useParseBlog } from "@/src/client/features/blog-parser/useParseBlog";
+import { useSequencifyBlog } from "@/src/client/features/blog-parser/useSequencifyBlog";
 import { Button } from "@/src/client/shared/shadcn/components/button";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
 import { BlogContent } from "@/src/common/model/blog-parser.model";
@@ -17,8 +18,16 @@ export interface BlogStudioProps {
 
 export function BlogStudio({ url }: BlogStudioProps) {
   const { data, isLoading, error } = useParseBlog(url);
+  const { sequencifyBlog, isLoading: isSequencifyLoading } =
+    useSequencifyBlog();
   const [blogContent, setBlogContent] = useState<BlogContent | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const handleSequencifyBlog = async () => {
+    if (!blogContent) return;
+    const response = await sequencifyBlog(blogContent);
+    setBlogContent(response);
+  };
 
   useEffect(() => {
     if (data) {
@@ -79,7 +88,16 @@ export function BlogStudio({ url }: BlogStudioProps) {
             <Button variant="outline" onClick={() => setIsEditing(true)}>
               편집
             </Button>
-            <Button variant="default">영상 만들기</Button>
+            <Button
+              variant="default"
+              onClick={handleSequencifyBlog}
+              disabled={isSequencifyLoading}
+            >
+              {isSequencifyLoading ? "Sequencify..." : "Sequencify!"}
+            </Button>
+            <Button variant="default" disabled>
+              영상 만들기
+            </Button>
           </>
         )}
       </div>
