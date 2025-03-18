@@ -75,7 +75,6 @@ export class FFmpegVideoConverter implements VideoConverter {
 
     // 작업 상태에 따른 진행 상태 매핑
     let progress: VideoRequestResult["progress"];
-
     switch (job.status) {
       case "pending":
         progress = "pending";
@@ -89,11 +88,14 @@ export class FFmpegVideoConverter implements VideoConverter {
       case "error":
         progress = "error";
         break;
+      default:
+        progress = "error";
+        break;
     }
 
     // 완료된 작업이면 출력 경로 포함
     const outputPath =
-      job.status === "done"
+      progress === "done"
         ? path.join(this.#outputDir, `${job.id}_final.mp4`)
         : undefined;
 

@@ -5,5 +5,6 @@ export interface VideoJob {
   title: string;
   scenes: VideoScene[];
   createdAt: Date;
-  status: "pending" | "processing" | "done" | "error";
+  status: "pending" | "queued" | "processing" | "done" | "error";
+  progress: number;
 }

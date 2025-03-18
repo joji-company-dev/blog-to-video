@@ -1,3 +1,6 @@
+import { Logger } from "@/src/server/utils/logger";
+import os from "os";
+import pLimit from "p-limit";
 import path from "path";
 import { FFmpegRenderer } from "../ffmpeg/ffmpeg-renderer";
 import { VideoJob } from "../model/video-job.model";
@@ -10,7 +13,10 @@ export class VideoJobService {
   #outputDir: string;
   #ffmpegRenderer: FFmpegRenderer;
   #jobs: Map<string, VideoJob> = new Map();
-  #debug: boolean;
+  #logger = new Logger("VideoJobService");
+  #concurrencyLimit: number;
+  #maxConcurrentJobs: number;
+  #activeJobs: number = 0;
 
   constructor(
     outputDir: string,
@@ -21,52 +27,38 @@ export class VideoJobService {
     } = {
       width: 1080,
       height: 1920,
-    }
+    },
+    concurrencyLimit?: number
   ) {
     this.#outputDir = outputDir;
-    this.#debug = debug;
+
     this.#ffmpegRenderer = new FFmpegRenderer({
       outputDir,
       debug,
       renderOptions: {
         resolution,
       },
+      useHardwareAccel: true,
     });
-    this.#log(`VideoJobService 초기화 - 출력 디렉토리: ${outputDir}`);
-  }
 
-  /**
-   * 디버그 로그 출력
-   */
-  #log(message: string) {
-    if (this.#debug) {
-      console.log(`[VideoJobService] ${message}`);
-    }
-  }
+    // CPU 코어 수에 기반한 동시 처리 제한
+    const cpuCount = os.cpus().length;
+    this.#concurrencyLimit =
+      concurrencyLimit ?? Math.max(1, Math.min(cpuCount - 1, 4));
+    this.#maxConcurrentJobs = Math.max(1, Math.ceil(cpuCount / 4));
 
-  /**
-   * 경고 로그 출력
-   */
-  #warn(message: string) {
-    if (this.#debug) {
-      console.warn(`[VideoJobService] ⚠️ ${message}`);
-    }
-  }
-
-  /**
-   * 에러 로그 출력
-   */
-  #error(message: string) {
-    if (this.#debug) {
-      console.error(`[VideoJobService] 🔴 ${message}`);
-    }
+    this.#logger.debug(
+      `VideoJobService 초기화 - 출력 디렉토리: ${outputDir}, 컷 동시 처리 수: ${
+        this.#concurrencyLimit
+      }, 최대 동시 작업 수: ${this.#maxConcurrentJobs}`
+    );
   }
 
   /**
    * 새 비디오 작업을 등록합니다.
    */
   registerJob(job: VideoJob): VideoJob {
-    this.#log(
+    this.#logger.debug(
       `새 작업 등록: ID=${job.id}, 제목="${job.title}", 장면 수=${job.scenes.length}`
     );
     this.#jobs.set(job.id, job);
@@ -79,9 +71,9 @@ export class VideoJobService {
   getJob(jobId: string): VideoJob | undefined {
     const job = this.#jobs.get(jobId);
     if (job) {
-      this.#log(`작업 조회 성공: ID=${jobId}, 상태=${job.status}`);
+      this.#logger.debug(`작업 조회 성공: ID=${jobId}, 상태=${job.status}`);
     } else {
-      this.#warn(`존재하지 않는 작업 ID 조회: ${jobId}`);
+      this.#logger.warn(`존재하지 않는 작업 ID 조회: ${jobId}`);
     }
     return job;
   }
@@ -97,100 +89,172 @@ export class VideoJobService {
     if (job) {
       const prevStatus = job.status;
       job.status = status;
-      this.#log(`작업 상태 업데이트: ID=${jobId}, ${prevStatus} -> ${status}`);
+      this.#logger.debug(
+        `작업 상태 업데이트: ID=${jobId}, ${prevStatus} -> ${status}`
+      );
       return job;
     }
-    this.#warn(
+    this.#logger.warn(
       `존재하지 않는 작업 상태 업데이트 시도: ID=${jobId}, 상태=${status}`
     );
     return undefined;
   }
 
   /**
+   * 작업을 큐에 추가하고 가능한 경우 실행합니다.
+   */
+  async enqueueJob(job: VideoJob): Promise<void> {
+    this.registerJob(job);
+
+    // 작업 대기 상태로 설정
+    this.updateJobStatus(job.id, "queued");
+
+    // 가능한 경우 작업 시작
+    this.tryProcessNextJob();
+  }
+
+  /**
+   * 대기 중인 다음 작업 처리 시도
+   */
+  private tryProcessNextJob(): void {
+    if (this.#activeJobs >= this.#maxConcurrentJobs) {
+      this.#logger.debug(
+        `최대 동시 작업 수(${this.#maxConcurrentJobs})에 도달, 대기 중`
+      );
+      return;
+    }
+
+    // 대기 중인 작업 찾기
+    const queuedJob = [...this.#jobs.values()].find(
+      (j) => j.status === "queued"
+    );
+    if (!queuedJob) {
+      return;
+    }
+
+    // 작업 시작
+    this.#activeJobs++;
+    this.processJob(queuedJob).finally(() => {
+      this.#activeJobs--;
+      // 이 작업이 완료되면 다음 작업 시도
+      this.tryProcessNextJob();
+    });
+  }
+
+  /**
    * 비디오 작업을 처리합니다.
    */
   async processJob(job: VideoJob): Promise<string> {
-    this.#log(`작업 처리 시작: ID=${job.id}, 제목="${job.title}"`);
+    this.#logger.debug(`작업 처리 시작: ID=${job.id}, 제목="${job.title}"`);
 
     try {
-      // 1. 작업 상태 업데이트
       this.updateJobStatus(job.id, "processing");
-      this.#log(`작업 장면 수: ${job.scenes.length}`);
+      job.progress = 0;
 
-      // 2. 각 장면을 처리하여 비디오 파일 생성
-      const scenePaths: string[] = [];
+      // 각 장면의 가중치 계산 (컷 수에 비례)
+      const totalCuts = job.scenes.reduce(
+        (sum, scene) => sum + scene.cuts.length,
+        0
+      );
+      const sceneWeights = job.scenes.map(
+        (scene) => scene.cuts.length / totalCuts
+      );
 
-      for (const [index, scene] of job.scenes.entries()) {
-        this.#log(
-          `장면 처리 시작 (${index + 1}/${job.scenes.length}): ID=${scene.id}`
-        );
-        const scenePath = await this.#processScene(scene);
-        this.#log(`장면 처리 완료: ${scenePath}`);
-        scenePaths.push(scenePath);
-      }
+      // 제한된 수의 장면 동시 처리
+      const sceneLimit = pLimit(
+        Math.max(1, Math.floor(this.#concurrencyLimit / 2))
+      );
+      const scenePromises = job.scenes.map((scene, index) =>
+        sceneLimit(() =>
+          this.#processScene(scene, index, job.scenes.length, (progress) => {
+            // 장면 진행도에 가중치 적용하여 전체 진행도 업데이트
+            job.progress =
+              sceneWeights
+                .slice(0, index)
+                .reduce((sum, w) => sum + w * 100, 0) +
+              progress * sceneWeights[index];
+          })
+        )
+      );
 
-      // 3. 모든 장면을 합쳐 최종 비디오 생성
+      const scenePaths = await Promise.all(scenePromises);
+
+      // 최종 합치기 (10% 가중치)
+      job.progress = 90;
+
       const outputFilename = `${job.id}_final.mp4`;
       const outputPath = path.join(this.#outputDir, outputFilename);
-      this.#log(`최종 비디오 생성 시작: ${outputPath}`);
 
       await this.#ffmpegRenderer.concatScenes(scenePaths, outputPath);
-      this.#log(`최종 비디오 생성 완료: ${outputPath}`);
 
-      // 4. 작업 상태 업데이트
+      job.progress = 100;
       this.updateJobStatus(job.id, "done");
 
       return outputPath;
     } catch (error) {
-      // 오류 발생 시 작업 상태를 "error"로 업데이트
       this.updateJobStatus(job.id, "error");
-      this.#error(`비디오 작업 처리 오류: ${error}`);
+      this.#logger.error(`비디오 작업 처리 오류: ${error}`);
       throw error;
     }
   }
 
-  /**
-   * 하나의 장면을 처리합니다.
-   */
-  async #processScene(scene: VideoScene): Promise<string> {
-    this.#log(`장면 처리: ID=${scene.id}, 컷 수=${scene.cuts.length}`);
-
-    // 1. 각 컷을 처리하여 개별 비디오 파일 생성
-    const cutPaths: string[] = [];
-
-    for (const [index, cut] of scene.cuts.entries()) {
-      const cutFilename = `${cut.id}.mp4`;
-      const cutPath = path.join(this.#outputDir, cutFilename);
-      this.#log(
-        `컷 렌더링 시작 (${index + 1}/${scene.cuts.length}): ID=${cut.id}`
-      );
-
-      try {
-        await this.#ffmpegRenderer.renderVideoCut(cut, cutPath);
-        this.#log(`컷 렌더링 완료: ${cutPath}`);
-        cutPaths.push(cutPath);
-      } catch (error) {
-        this.#error(`컷 렌더링 실패: ID=${cut.id}, 오류=${error}`);
-        throw error;
-      }
-    }
-
-    // 2. 모든 컷을 합쳐 하나의 장면 비디오 생성
-    const sceneFilename = `${scene.id}.mp4`;
-    const scenePath = path.join(this.#outputDir, sceneFilename);
-    this.#log(`장면 합치기 시작: ${scenePath}`);
+  async #processScene(
+    scene: VideoScene,
+    sceneIndex: number,
+    totalScenes: number,
+    onProgress: (progress: number) => void
+  ): Promise<string> {
+    this.#logger.debug(
+      `장면 처리 시작 (${sceneIndex}/${totalScenes}): ID=${scene.id}, 컷 수=${scene.cuts.length}`
+    );
 
     try {
+      const limit = pLimit(this.#concurrencyLimit);
+
+      // 진행도 추적 변수
+      let completedCuts = 0;
+      const totalCuts = scene.cuts.length;
+
+      const cutPromises = scene.cuts.map((cut, index) =>
+        limit(() => {
+          const cutFilename = `${cut.id}.mp4`;
+          const cutPath = path.join(this.#outputDir, cutFilename);
+          this.#logger.debug(
+            `컷 렌더링 시작 (${index + 1}/${scene.cuts.length}): ID=${cut.id}`
+          );
+
+          return this.#ffmpegRenderer
+            .renderVideoCut(cut, cutPath)
+            .then((path) => {
+              completedCuts++;
+              // 컷 렌더링 진행도 (80% 가중치)
+              onProgress((completedCuts / totalCuts) * 80);
+              return path;
+            })
+            .catch((error) => {
+              this.#logger.error(`컷 렌더링 실패: ID=${cut.id}, 오류=${error}`);
+              throw error;
+            });
+        })
+      );
+
+      const cutPaths = await Promise.all(cutPromises);
+
+      // 장면 합치기 시작 (20% 가중치)
+      onProgress(80);
+
+      const sceneFilename = `${scene.id}.mp4`;
+      const scenePath = path.join(this.#outputDir, sceneFilename);
+
       await this.#ffmpegRenderer.concatSceneCuts(cutPaths, scenePath);
-      this.#log(`장면 합치기 완료: ${scenePath}`);
 
-      // 3. 장면의 출력 경로 저장
+      // 장면 처리 완료
+      onProgress(100);
+
       scene.outputPath = scenePath;
-      this.#log(`장면 출력 경로 설정: ${scenePath}`);
-
       return scenePath;
     } catch (error) {
-      this.#error(`장면 합치기 실패: ID=${scene.id}, 오류=${error}`);
+      this.#logger.error(`장면 처리 실패: ID=${scene.id}, 오류=${error}`);
       throw error;
     }
   }
