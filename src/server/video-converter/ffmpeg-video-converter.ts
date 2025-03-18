@@ -2,40 +2,60 @@ import { BlogContent } from "@/src/common/model/blog-parser.model";
 import { VideoRequestResult } from "@/src/common/model/video-request-result";
 import fs from "fs";
 import path from "path";
-import { BlogToVideoJobService } from "./service/blog-to-video-job.service";
-import { VideoJobService } from "./service/video-job.service";
-import { TaskQueue } from "./task-queue";
+import {
+  BlogToVideoJobService,
+  IBlogToVideoJobService,
+} from "./service/blog-to-video-job.service";
+import {
+  IVideoJobWorkerService,
+  VideoJobWorkerService,
+} from "./service/video-job-worker.service";
+import { ITaskQueue, TaskQueue } from "./task-queue";
 import { VideoConverter } from "./video-converter.interface";
 
 export class FFmpegVideoConverter implements VideoConverter {
-  #taskQueue: TaskQueue;
+  #taskQueue: ITaskQueue;
   #outputDir: string;
-  #blogToVideoService: BlogToVideoJobService;
-  #videoJobService: VideoJobService;
+  #blogToVideoService: IBlogToVideoJobService;
+  #videoJobWorkerService: IVideoJobWorkerService;
 
-  constructor(outputDir: string = "./output") {
-    // 출력 디렉토리 생성
-    this.#outputDir = path.resolve(process.cwd(), outputDir);
-    if (!fs.existsSync(this.#outputDir)) {
-      fs.mkdirSync(this.#outputDir, { recursive: true });
+  constructor(
+    options: {
+      outputDir?: string;
+      taskQueue?: ITaskQueue;
+      blogToVideoService?: IBlogToVideoJobService;
+      videoJobWorkerService?: IVideoJobWorkerService;
+    } = {}
+  ) {
+    this.#outputDir = this.#resolveOutputDir(options.outputDir || "./output");
+
+    this.#taskQueue = options.taskQueue || new TaskQueue();
+    this.#blogToVideoService =
+      options.blogToVideoService || new BlogToVideoJobService();
+    this.#videoJobWorkerService =
+      options.videoJobWorkerService ||
+      new VideoJobWorkerService(this.#outputDir);
+  }
+
+  #resolveOutputDir(outputDir: string) {
+    const outputDirPath = path.resolve(process.cwd(), outputDir);
+    if (!fs.existsSync(outputDirPath)) {
+      fs.mkdirSync(outputDirPath, { recursive: true });
     }
-
-    // 서비스 초기화
-    this.#taskQueue = new TaskQueue();
-    this.#blogToVideoService = new BlogToVideoJobService();
-    this.#videoJobService = new VideoJobService(this.#outputDir);
+    return outputDirPath;
   }
 
   async convert(blogContent: BlogContent): Promise<VideoRequestResult> {
     try {
-      // 1. 블로그 콘텐츠를 비디오 작업으로 변환
       const videoJob = this.#blogToVideoService.createVideoJob(blogContent);
 
       // 2. 비디오 작업 등록
-      this.#videoJobService.registerJob(videoJob);
+      this.#videoJobWorkerService.registerJob(videoJob);
 
       // 3. 작업 큐에 비디오 생성 작업 추가
-      this.#taskQueue.add(() => this.#videoJobService.processJob(videoJob));
+      this.#taskQueue.add(() =>
+        this.#videoJobWorkerService.processJob(videoJob)
+      );
 
       // 4. 작업 큐 처리 시작 (이미 처리 중이 아니라면)
       if (!this.#taskQueue.processingTask) {
@@ -67,7 +87,7 @@ export class FFmpegVideoConverter implements VideoConverter {
     progress: VideoRequestResult["progress"];
     outputPath?: string;
   } {
-    const job = this.#videoJobService.getJob(jobId);
+    const job = this.#videoJobWorkerService.getJob(jobId);
 
     if (!job) {
       return { progress: "error" };

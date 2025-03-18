@@ -4,6 +4,10 @@ import { VideoCut } from "../model/video-cut.model";
 import { VideoJob } from "../model/video-job.model";
 import { VideoScene } from "../model/video-scene.model";
 
+export interface IBlogToVideoJobService {
+  createVideoJob(blogContent: BlogContent): VideoJob;
+}
+
 /**
  * 블로그 콘텐츠를 비디오 작업으로 변환하는 서비스
  */
@@ -20,6 +24,7 @@ export class BlogToVideoJobService {
       scenes: this.createVideoScenes(jobId, blogContent.blocks),
       createdAt: new Date(),
       status: "pending",
+      progress: 0,
     };
   }
 

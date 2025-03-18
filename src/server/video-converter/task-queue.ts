@@ -1,6 +1,12 @@
 import { Logger } from "@/src/server/utils/logger";
 
-export class TaskQueue {
+export interface ITaskQueue {
+  processingTask: Promise<string | void> | null;
+  add: (task: () => Promise<string | void>) => void;
+  process: () => Promise<void>;
+}
+
+export class TaskQueue implements ITaskQueue {
   #logger = new Logger("TaskQueue", true);
   #queue: (() => Promise<string | void>)[] = [];
   #processingTask: Promise<string | void> | null = null;

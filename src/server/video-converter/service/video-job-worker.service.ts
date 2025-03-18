@@ -6,10 +6,21 @@ import { FFmpegRenderer } from "../ffmpeg/ffmpeg-renderer";
 import { VideoJob } from "../model/video-job.model";
 import { VideoScene } from "../model/video-scene.model";
 
+export interface IVideoJobWorkerService {
+  registerJob(job: VideoJob): VideoJob;
+  processJob(job: VideoJob): Promise<string>;
+  getJob(jobId: string): VideoJob | undefined;
+  updateJobStatus(
+    jobId: string,
+    status: VideoJob["status"]
+  ): VideoJob | undefined;
+  enqueueJob(job: VideoJob): Promise<void>;
+}
+
 /**
  * 비디오 작업을 처리하고 관리하는 서비스
  */
-export class VideoJobService {
+export class VideoJobWorkerService implements IVideoJobWorkerService {
   #outputDir: string;
   #ffmpegRenderer: FFmpegRenderer;
   #jobs: Map<string, VideoJob> = new Map();
