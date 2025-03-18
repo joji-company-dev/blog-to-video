@@ -16,6 +16,8 @@ export interface FFmpegCommandOptions {
   renderOptions: VideoRenderOptions;
   /** 깊은 디버그 모드 활성화 여부 */
   verbose?: boolean;
+  /** 하드웨어 가속 사용 여부 */
+  useHardwareAccel?: boolean;
 }
 
 /**
@@ -88,9 +90,31 @@ export class FFmpegCommandBuilder {
         : [`-t ${this.#options.duration}`]),
       "-pix_fmt",
       renderOpts.pixelFormat,
-      "-c:v",
-      renderOpts.videoCodec,
     ];
+
+    // 하드웨어 가속 설정
+    if (this.#options.useHardwareAccel) {
+      const platform = process.platform;
+
+      if (platform === "darwin") {
+        // macOS에서의 VideoToolbox 가속
+        this.#command.outputOption("-c:v h264_videotoolbox");
+      } else if (platform === "win32") {
+        // Windows에서의 NVIDIA NVENC 가속
+        this.#command.outputOption("-c:v h264_nvenc");
+      } else if (platform === "linux") {
+        // Linux에서의 VAAPI 가속
+        this.#command
+          .outputOption("-vaapi_device /dev/dri/renderD128")
+          .outputOption('-vf "format=nv12,hwupload"')
+          .outputOption("-c:v h264_vaapi");
+      }
+
+      this.#logger.debug(`하드웨어 가속 활성화 (${platform})`);
+    } else {
+      // 소프트웨어 인코딩
+      this.#command.outputOption("-c:v libx264");
+    }
 
     this.#command.outputOptions(outputOptions);
     return this;

@@ -24,6 +24,8 @@ export interface FFmpegRendererOptions {
   fontPath?: string;
   /** 비디오 렌더링 옵션 */
   renderOptions?: Partial<VideoRenderOptions>;
+  /** 하드웨어 가속 사용 여부 */
+  useHardwareAccel?: boolean;
 }
 
 /**
@@ -52,12 +54,14 @@ export class FFmpegRenderer {
   #fontPath: string;
   #logger: Logger;
   #renderOptions: VideoRenderOptionsManager;
+  #useHardwareAccel: boolean;
 
   constructor(options: FFmpegRendererOptions) {
     this.#outputDir = options.outputDir;
     this.#logger = new Logger("FFmpegRenderer", options.debug ?? true);
     this.#fontPath = options.fontPath ?? this.#findSystemFont();
     this.#renderOptions = new VideoRenderOptionsManager(options.renderOptions);
+    this.#useHardwareAccel = options.useHardwareAccel ?? false;
 
     this.#ensureOutputDirExists();
     this.#checkFFmpegInstallation();
@@ -125,6 +129,7 @@ export class FFmpegRenderer {
       duration: cut.duration,
       resolution: renderOpts.resolution,
       renderOptions: renderOpts,
+      useHardwareAccel: this.#useHardwareAccel,
     };
 
     const builder = new FFmpegCommandBuilder(commandOptions);
