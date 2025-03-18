@@ -7,20 +7,49 @@ import { BlogBlock as BlogBlockType } from "@/src/common/model/blog-parser.model
 
 interface BlogBlockProps {
   block: BlogBlockType;
+  isEditable?: boolean;
+  onChange?: (block: BlogBlockType) => void;
 }
 
-export function BlogBlock({ block }: BlogBlockProps) {
+// TODO: Implement isEditable
+export function BlogBlock({
+  block,
+  isEditable = false,
+  onChange,
+}: BlogBlockProps) {
   switch (block.type) {
     case "text":
-      return <TextBlock block={block} />;
+      return (
+        <TextBlock block={block} isEditable={isEditable} onChange={onChange} />
+      );
     case "image":
-      return <ImageBlock block={block} />;
+      return (
+        <ImageBlock block={block} isEditable={isEditable} onChange={onChange} />
+      );
     case "singleImageAndSingleText":
-      return <SingleImageAndSingleTextBlock block={block} />;
+      return (
+        <SingleImageAndSingleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
     case "singleImageAndMultipleText":
-      return <SingleImageAndMultipleTextBlock block={block} />;
+      return (
+        <SingleImageAndMultipleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
     case "multipleImageAndSingleText":
-      return <MultipleImageAndSingleTextBlock block={block} />;
+      return (
+        <MultipleImageAndSingleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
     default:
       throw new Error(`Unknown block: ${JSON.stringify(block)}`);
   }

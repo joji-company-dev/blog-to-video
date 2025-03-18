@@ -1,5 +1,5 @@
 import { PageLayout } from "@/src/client/app/ui/page-layout";
-import { BlogParser } from "@/src/client/features/blog-parser/BlogParser";
+import { BlogStudio } from "@/src/client/features/blog-parser/BlogStudio";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
 
 export async function BlogParserPage({
@@ -14,7 +14,7 @@ export async function BlogParserPage({
       <div className="mx-auto w-full max-w-5xl border border-gray-200 rounded-lg p-8">
         <div className="space-y-8">
           <Typography.H1 className="text-center">Blog To Video</Typography.H1>
-          <BlogParser url={url} />
+          <BlogStudio url={url} />
         </div>
       </div>
     </PageLayout>
