@@ -2,7 +2,7 @@ import path from "path";
 import { Logger } from "../../utils/logger";
 import { FFmpegCommandBuilder } from "../ffmpeg/command/ffmpeg-command-builder";
 import { FFmpegConcatBuilder } from "../ffmpeg/command/ffmpeg-concat-builder";
-import { VideoRenderOptionsManager } from "../ffmpeg/options/video-render-options";
+import { VideoRenderOptionsManager } from "../ffmpeg/options/video-render-options-manager";
 
 /**
  * 빌더 클래스를 직접 사용하는 예제

@@ -1,6 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
 import { Logger } from "../../../utils/logger";
-import { VideoRenderOptions } from "../options/video-render-options";
+import { VideoRenderOptions } from "../options/video-render-options-manager";
 
 /**
  * FFmpeg 명령 설정 인터페이스

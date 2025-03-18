@@ -10,7 +10,7 @@ import { FFmpegConcatBuilder } from "./command/ffmpeg-concat-builder";
 import {
   VideoRenderOptions,
   VideoRenderOptionsManager,
-} from "./options/video-render-options";
+} from "./options/video-render-options-manager";
 
 /**
  * FFmpegRenderer 설정 옵션 인터페이스
