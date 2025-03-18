@@ -30,6 +30,15 @@ export interface TextStyleOptions {
     /** 그림자 색상 (투명도 포함) */
     color: string;
   };
+  /** 텍스트 줄바꿈 설정 */
+  textWrap: {
+    /** 자동 줄바꿈 사용 여부 */
+    enabled: boolean;
+    /** 최대 텍스트 너비 (픽셀 단위 또는 비디오 너비 대비 비율, 예: 900 또는 "0.8") */
+    maxLineWidth: number | string;
+    /** 줄 간격 (폰트 크기 배수) */
+    lineSpacing: number;
+  };
 }
 
 /**
@@ -101,6 +110,11 @@ export class VideoRenderOptionsManager {
           x: 2,
           y: 2,
           color: "black@0.3",
+        },
+        textWrap: {
+          enabled: true,
+          maxLineWidth: "0.8", // 기본적으로 화면 너비의 80%
+          lineSpacing: 1.2,
         },
       },
       resolution: DEFAULT_RESOLUTIONS.landscape,
@@ -197,6 +211,29 @@ export class VideoRenderOptionsManager {
         current.shadow.color = newOptions.shadow.color;
       }
     }
+
+    // textWrap 객체 병합
+    if (newOptions.textWrap) {
+      if (!current.textWrap) {
+        current.textWrap = {
+          enabled: true,
+          maxLineWidth: "0.8",
+          lineSpacing: 1.2,
+        };
+      }
+
+      if (newOptions.textWrap.enabled !== undefined) {
+        current.textWrap.enabled = newOptions.textWrap.enabled;
+      }
+
+      if (newOptions.textWrap.maxLineWidth !== undefined) {
+        current.textWrap.maxLineWidth = newOptions.textWrap.maxLineWidth;
+      }
+
+      if (newOptions.textWrap.lineSpacing !== undefined) {
+        current.textWrap.lineSpacing = newOptions.textWrap.lineSpacing;
+      }
+    }
   }
 
   /**
@@ -262,30 +299,149 @@ export class VideoRenderOptionsManager {
       .replace(/;/g, "\\;");
   }
 
+  /**
+   * 텍스트에 자동 줄바꿈 적용
+   */
+  #wrapText(text: string): string[] {
+    if (!this.#options.textStyle.textWrap?.enabled) {
+      return [text];
+    }
+
+    const style = this.#options.textStyle;
+    const maxLineWidth = style.textWrap.maxLineWidth;
+    let effectiveMaxWidth: number;
+
+    // 최대 너비를 계산
+    if (typeof maxLineWidth === "string" && maxLineWidth.includes(".")) {
+      // 비율로 지정된 경우 (예: "0.8")
+      const ratio = parseFloat(maxLineWidth);
+      effectiveMaxWidth = this.#options.resolution.width * ratio;
+    } else {
+      // 픽셀로 지정된 경우
+      effectiveMaxWidth =
+        typeof maxLineWidth === "string"
+          ? parseInt(maxLineWidth, 10)
+          : maxLineWidth;
+    }
+
+    // 추정 글자당 평균 너비 (폰트 크기에 비례)
+    const avgCharWidth = style.fontSize * 0.6;
+    const charsPerLine = Math.floor(effectiveMaxWidth / avgCharWidth);
+
+    // 텍스트 줄바꿈 처리
+    const lines: string[] = [];
+    let currentLine = "";
+    const words = text.split(" ");
+
+    for (const word of words) {
+      if ((currentLine + word).length <= charsPerLine) {
+        currentLine += (currentLine ? " " : "") + word;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+
+        // 단어 자체가 너무 길 경우 강제 줄바꿈
+        if (word.length > charsPerLine) {
+          let remainingWord = word;
+          while (remainingWord.length > 0) {
+            const chunk = remainingWord.slice(0, charsPerLine);
+            remainingWord = remainingWord.slice(charsPerLine);
+            lines.push(chunk);
+          }
+          currentLine = "";
+        } else {
+          currentLine = word;
+        }
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines;
+  }
+
   createTextFilterString(fontPath: string, text: string): string {
     const style = this.#options.textStyle;
-    let filter =
-      `drawtext=fontfile='${fontPath}'` +
-      `:text='${this.#escapeText(text)}'` +
-      `:fontcolor=${style.fontColor}` +
-      `:fontsize=${style.fontSize}`;
+    const lines = this.#wrapText(text);
 
-    if (style.boxEnabled) {
-      filter +=
-        `:box=1` +
-        `:boxcolor=${style.boxColor}` +
-        `:boxborderw=${style.boxBorderWidth}`;
+    if (lines.length === 1) {
+      // 줄바꿈이 필요없는 경우 기존 방식 사용
+      let filter =
+        `drawtext=fontfile='${fontPath}'` +
+        `:text='${this.#escapeText(lines[0])}'` +
+        `:fontcolor=${style.fontColor}` +
+        `:fontsize=${style.fontSize}`;
+
+      if (style.boxEnabled) {
+        filter +=
+          `:box=1` +
+          `:boxcolor=${style.boxColor}` +
+          `:boxborderw=${style.boxBorderWidth}`;
+      }
+
+      filter += `:x=${style.position.x}` + `:y=${style.position.y}`;
+
+      if (style.shadow.enabled) {
+        filter +=
+          `:shadowx=${style.shadow.x}` +
+          `:shadowy=${style.shadow.y}` +
+          `:shadowcolor=${style.shadow.color}`;
+      }
+
+      return filter;
+    } else {
+      // 여러 줄이 있는 경우 각 줄에 대해 필터 생성
+      const filters: string[] = [];
+      const lineHeight = style.fontSize * (style.textWrap?.lineSpacing || 1.2);
+
+      for (let i = 0; i < lines.length; i++) {
+        let yPosition = "";
+
+        // 기본 y 위치에서 줄 위치에 따라 조정
+        if (style.position.y.includes("h*")) {
+          // h*3/4 같은 형식인 경우
+          const baseY = style.position.y;
+          yPosition = `${baseY}+${i * lineHeight}`;
+        } else if (style.position.y.includes("h-")) {
+          // h-th-50 같은 형식인 경우
+          const baseY = style.position.y;
+          yPosition = `${baseY}-${(lines.length - 1 - i) * lineHeight}`;
+        } else {
+          // 단순한 숫자나 다른 형식인 경우
+          const baseY = style.position.y;
+          yPosition = `${baseY}+${i * lineHeight}`;
+        }
+
+        let filter =
+          `drawtext=fontfile='${fontPath}'` +
+          `:text='${this.#escapeText(lines[i])}'` +
+          `:fontcolor=${style.fontColor}` +
+          `:fontsize=${style.fontSize}`;
+
+        if (style.boxEnabled) {
+          filter +=
+            `:box=1` +
+            `:boxcolor=${style.boxColor}` +
+            `:boxborderw=${style.boxBorderWidth}`;
+        }
+
+        filter += `:x=${style.position.x}` + `:y=${yPosition}`;
+
+        if (style.shadow.enabled) {
+          filter +=
+            `:shadowx=${style.shadow.x}` +
+            `:shadowy=${style.shadow.y}` +
+            `:shadowcolor=${style.shadow.color}`;
+        }
+
+        filters.push(filter);
+      }
+
+      // 모든 줄의 필터를 쉼표로 연결하여 반환
+      return filters.join(",");
     }
-
-    filter += `:x=${style.position.x}` + `:y=${style.position.y}`;
-
-    if (style.shadow.enabled) {
-      filter +=
-        `:shadowx=${style.shadow.x}` +
-        `:shadowy=${style.shadow.y}` +
-        `:shadowcolor=${style.shadow.color}`;
-    }
-
-    return filter;
   }
 }
