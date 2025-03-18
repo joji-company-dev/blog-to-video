@@ -11,7 +11,7 @@ export async function BlogParserPage({
 
   return (
     <PageLayout className="space-y-8 h-full">
-      <div className="mx-auto w-full max-w-5xl border border-gray-200 rounded-lg p-8">
+      <div className="mx-auto w-full max-w-5xl rounded-lg p-8">
         <div className="space-y-8">
           <Typography.H1 className="text-center">Blog To Video</Typography.H1>
           <BlogStudio url={url} />

@@ -54,7 +54,7 @@ export function BlogStudio({ url }: BlogStudioProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center h-full gap-4">
-        <BounceLoader />
+        <BounceLoader color="currentColor" />
         <Typography.Lead>블로그 분석 중...</Typography.Lead>
       </div>
     );
@@ -93,11 +93,7 @@ export function BlogStudio({ url }: BlogStudioProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <Typography.H3 className="text-center">분석 결과</Typography.H3>
-      </div>
-
+    <div className="flex flex-col gap-4 space-y-2">
       <div className="flex justify-end gap-2 md:gap-4">
         {!isEditing && (
           <>

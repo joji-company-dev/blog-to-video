@@ -1,4 +1,5 @@
 import "@/src/client/app/style/globals.css";
+import { ThemeProvider } from "@/src/client/app/style/theme-provider";
 import { QueryProvider } from "@/src/client/shared/lib/react-query/QueryProvider";
 import type { Metadata } from "next";
 import { Geist_Mono, Noto_Sans_KR } from "next/font/google";
@@ -28,7 +29,14 @@ export default function RootLayout({
       <body
         className={`${notoSansKR.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>{children}</QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

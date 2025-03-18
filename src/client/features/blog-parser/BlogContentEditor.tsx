@@ -57,7 +57,7 @@ export function BlogContentEditor({
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 bg-card text-card-foreground rounded-lg p-4">
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onCancel}>
           취소

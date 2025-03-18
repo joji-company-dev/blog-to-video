@@ -57,7 +57,7 @@ export function VideoJobStatusViewer({
   };
 
   return (
-    <div className="border rounded-lg p-6 bg-slate-50 mt-4">
+    <div className="border rounded-lg p-6 bg-card text-card-foreground mt-4">
       <div className="flex justify-between items-center mb-4">
         <Typography.H4>비디오 변환 작업</Typography.H4>
         <Button variant="ghost" size="sm" onClick={onClose}>
@@ -68,7 +68,7 @@ export function VideoJobStatusViewer({
       <div className="space-y-4">
         {isLoading && !status ? (
           <div className="flex items-center justify-center py-4">
-            <BounceLoader size={30} />
+            <BounceLoader color="currentColor" size={30} />
           </div>
         ) : error ? (
           <div className="text-red-500">
@@ -91,7 +91,9 @@ export function VideoJobStatusViewer({
               </div>
               <span className="text-sm font-medium">{getStatusText()}</span>
               {(status?.progress === "processing" ||
-                status?.progress === "pending") && <BounceLoader size={15} />}
+                status?.progress === "pending") && (
+                <BounceLoader color="currentColor" size={15} />
+              )}
             </div>
 
             {status?.progress === "done" && status.videoUrl && (
