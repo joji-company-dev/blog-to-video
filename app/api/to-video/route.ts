@@ -3,10 +3,11 @@ import {
   blogContentModel,
 } from "@/src/common/model/blog-parser.model";
 import { VideoRequestResult } from "@/src/common/model/video-request-result";
-import { FFmpegVideoConverter } from "@/src/server/video-converter/ffmpeg-video-converter";
+import { FFmpegVideoConverter } from "@/src/server/video-converter";
 
-// 싱글톤 인스턴스 생성
-const videoConverter = new FFmpegVideoConverter("./public/videos");
+const videoConverter = new FFmpegVideoConverter({
+  outputDir: "./public/videos",
+});
 
 export async function POST(request: Request) {
   const { content } = await request.json();
