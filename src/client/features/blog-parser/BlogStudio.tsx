@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { BounceLoader } from "react-spinners";
 import { BlogContentEditor } from "./BlogContentEditor";
 import { BlogContentViewer } from "./BlogContentViewer";
+import { useCreateVideo } from "./useCreateVideo";
+import { VideoJobStatusViewer } from "./VideoJobStatusViewer";
 
 export interface BlogStudioProps {
   url: string;
@@ -20,13 +22,27 @@ export function BlogStudio({ url }: BlogStudioProps) {
   const { data, isLoading, error } = useParseBlog(url);
   const { sequencifyBlog, isLoading: isSequencifyLoading } =
     useSequencifyBlog();
+  const { createVideo, isLoading: isVideoLoading } = useCreateVideo();
   const [blogContent, setBlogContent] = useState<BlogContent | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [videoJobId, setVideoJobId] = useState<string | null>(null);
+  const [showVideoStatus, setShowVideoStatus] = useState(false);
 
   const handleSequencifyBlog = async () => {
     if (!blogContent) return;
     const response = await sequencifyBlog(blogContent);
     setBlogContent(response);
+  };
+
+  const handleCreateVideo = async () => {
+    if (!blogContent) return;
+    try {
+      const result = await createVideo(blogContent);
+      setVideoJobId(result.jobId);
+      setShowVideoStatus(true);
+    } catch (error) {
+      console.error("비디오 생성 요청 오류:", error);
+    }
   };
 
   useEffect(() => {
@@ -95,12 +111,23 @@ export function BlogStudio({ url }: BlogStudioProps) {
             >
               {isSequencifyLoading ? "Sequencify..." : "Sequencify!"}
             </Button>
-            <Button variant="default" disabled>
-              영상 만들기
+            <Button
+              variant="default"
+              onClick={handleCreateVideo}
+              disabled={isVideoLoading}
+            >
+              {isVideoLoading ? "영상 생성 중..." : "영상 만들기"}
             </Button>
           </>
         )}
       </div>
+
+      {showVideoStatus && videoJobId && (
+        <VideoJobStatusViewer
+          jobId={videoJobId}
+          onClose={() => setShowVideoStatus(false)}
+        />
+      )}
 
       {isEditing ? (
         <BlogContentEditor
