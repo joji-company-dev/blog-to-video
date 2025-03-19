@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { imageBlockModel } from "./image-block.model";
+import {
+  imageBlockModel,
+  imageBlockModelWithAnalysis,
+} from "./image-block.model";
 import { textBlockModel } from "./text-block.model";
 
 export const singleImageAndMultipleTextBlockModel = z.object({
@@ -9,6 +12,15 @@ export const singleImageAndMultipleTextBlockModel = z.object({
   textBlocks: z.array(textBlockModel),
 });
 
+export const singleImageAndMultipleTextBlockModelWithAnalysis =
+  singleImageAndMultipleTextBlockModel.extend({
+    imageBlock: imageBlockModelWithAnalysis,
+  });
+
 export type SingleImageAndMultipleTextBlock = z.infer<
   typeof singleImageAndMultipleTextBlockModel
+>;
+
+export type SingleImageAndMultipleTextBlockWithAnalysis = z.infer<
+  typeof singleImageAndMultipleTextBlockModelWithAnalysis
 >;

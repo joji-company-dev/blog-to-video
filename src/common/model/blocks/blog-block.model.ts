@@ -1,9 +1,21 @@
 import { z } from "zod";
-import { imageBlockModel } from "./image-block.model";
-import { multipleImageAndSingleTextBlockModel } from "./multiple-image-single-text-block.model";
-import { singleImageAndMultipleTextBlockModel } from "./single-image-multiple-text-block.model";
-import { singleImageAndSingleTextBlockModel } from "./single-image-single-text-block.model";
-import { textBlockModel } from "./text-block.model";
+import {
+  imageBlockModel,
+  imageBlockModelWithAnalysis,
+} from "./image-block.model";
+import {
+  multipleImageAndSingleTextBlockModel,
+  multipleImageAndSingleTextBlockModelWithAnalysis,
+} from "./multiple-image-single-text-block.model";
+import {
+  singleImageAndMultipleTextBlockModel,
+  singleImageAndMultipleTextBlockModelWithAnalysis,
+} from "./single-image-multiple-text-block.model";
+import {
+  singleImageAndSingleTextBlockModel,
+  singleImageAndSingleTextBlockModelWithAnalysis,
+} from "./single-image-single-text-block.model";
+import { textBlockModel, textBlockModelWithAnalysis } from "./text-block.model";
 
 export const blogBlockModel = z.union([
   textBlockModel,
@@ -13,7 +25,16 @@ export const blogBlockModel = z.union([
   multipleImageAndSingleTextBlockModel,
 ]);
 
+export const blogBlockModelWithAnalysis = z.union([
+  textBlockModelWithAnalysis,
+  imageBlockModelWithAnalysis,
+  singleImageAndSingleTextBlockModelWithAnalysis,
+  singleImageAndMultipleTextBlockModelWithAnalysis,
+  multipleImageAndSingleTextBlockModelWithAnalysis,
+]);
+
 export type BlogBlock = z.infer<typeof blogBlockModel>;
+export type BlogBlockWithAnalysis = z.infer<typeof blogBlockModelWithAnalysis>;
 
 export * from "./image-block.model";
 export * from "./multiple-image-single-text-block.model";
