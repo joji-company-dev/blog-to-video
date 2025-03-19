@@ -29,6 +29,11 @@ async function directBuilderExample() {
         x: "(w-text_w)/2",
         y: "h-th-50",
       },
+      textWrap: {
+        enabled: true,
+        maxLineWidth: 100,
+        lineSpacing: 10,
+      },
       shadow: {
         enabled: true,
         x: 3,

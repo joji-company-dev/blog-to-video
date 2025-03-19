@@ -31,7 +31,7 @@ export interface TextStyleOptions {
     color: string;
   };
   /** 텍스트 줄바꿈 설정 */
-  textWrap: {
+  textWrap?: {
     /** 자동 줄바꿈 사용 여부 */
     enabled: boolean;
     /** 최대 텍스트 너비 (픽셀 단위 또는 비디오 너비 대비 비율, 예: 900 또는 "0.8") */
