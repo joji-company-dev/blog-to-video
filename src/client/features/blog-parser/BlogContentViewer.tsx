@@ -11,7 +11,7 @@ export function BlogContentViewer({ block }: BlogContentViewerProps) {
   const { title, blocks } = block;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border p-4">
+    <div className="flex flex-col gap-2 rounded-lg border p-4 bg-card text-card-foreground">
       <div className="space-y-4">
         <Typography.H3>Title</Typography.H3>
         <Typography.H4>{title}</Typography.H4>
