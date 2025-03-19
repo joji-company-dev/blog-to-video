@@ -1,12 +1,29 @@
 /* eslint-disable @next/next/no-img-element */
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/src/client/shared/shadcn/components/collapsible";
 import { Input } from "@/src/client/shared/shadcn/components/input";
-import { ImageBlock as ImageBlockType } from "@/src/common/model/blocks";
+import { Label } from "@/src/client/shared/shadcn/components/label";
+import { Textarea } from "@/src/client/shared/shadcn/components/textarea";
+import {
+  TypographyMuted,
+  TypographySmall,
+} from "@/src/client/shared/shadcn/components/typography";
+import {
+  imageBlockModelWithAnalysis,
+  ImageBlock as ImageBlockType,
+  ImageBlockWithAnalysis as ImageBlockWithAnalysisType,
+} from "@/src/common/model/blocks";
 import { useRef } from "react";
 
 interface ImageBlockProps<IsEditable extends boolean> {
-  block: ImageBlockType;
+  block: ImageBlockType | ImageBlockWithAnalysisType;
   isEditable: IsEditable;
-  onChange?: IsEditable extends true ? (block: ImageBlockType) => void : never;
+  onChange?: IsEditable extends true
+    ? (block: ImageBlockType | ImageBlockWithAnalysisType) => void
+    : never;
 }
 
 export function ImageBlock<IsEditable extends boolean>({
@@ -23,6 +40,31 @@ export function ImageBlock<IsEditable extends boolean>({
 export function ReadOnlyImageBlock({
   block,
 }: Omit<ImageBlockProps<false>, "isEditable" | "onChange">) {
+  if (hasAnalysis(block)) {
+    return (
+      <div className="p-2">
+        <img src={block.value.src} alt="이미지" />
+        <Collapsible className="border border-t-0 p-2 rounded-lg rounded-t-none space-y-2">
+          <CollapsibleTrigger className="w-full text-left">
+            <TypographyMuted>이미지 분석 결과 보기</TypographyMuted>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="flex flex-col gap-2">
+              <TypographySmall>
+                <span className="text-muted-foreground">설명:</span>{" "}
+                {block.value.analysis.text}
+              </TypographySmall>
+              <TypographySmall>
+                <span className="text-muted-foreground">키워드:</span>{" "}
+                {block.value.analysis.objects.join(", ")}
+              </TypographySmall>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    );
+  }
+
   return (
     <div className="p-2">
       <img src={block.value.src} alt="이미지" />
@@ -63,6 +105,71 @@ export function EditableImageBlock({
     reader.readAsDataURL(file);
   };
 
+  if (hasAnalysis(block)) {
+    return (
+      <div className="p-2">
+        <img
+          src={block.value.src}
+          alt="이미지"
+          className="cursor-pointer hover:opacity-80"
+          onClick={() => inputRef.current?.click()}
+        />
+        <div className="flex flex-col gap-2">
+          <TypographySmall>이미지 분석 결과</TypographySmall>
+          <Label>
+            <TypographySmall>설명</TypographySmall>
+            <Textarea
+              defaultValue={block.value.analysis.text}
+              onBlur={(e) => {
+                const newValue = e.target.value.trim();
+                e.target.value = newValue;
+                onChange?.({
+                  ...block,
+                  value: {
+                    ...block.value,
+                    analysis: {
+                      ...block.value.analysis,
+                      text: newValue,
+                    },
+                  },
+                });
+              }}
+            />
+          </Label>
+          <Label>
+            <TypographySmall>키워드</TypographySmall>
+            <Textarea
+              defaultValue={block.value.analysis.objects.join(", ")}
+              onBlur={(e) => {
+                const newValue = e.target.value
+                  .split(",")
+                  .map((text) => text.trim())
+                  .filter(Boolean);
+                e.target.value = newValue.join(", ");
+                onChange?.({
+                  ...block,
+                  value: {
+                    ...block.value,
+                    analysis: {
+                      ...block.value.analysis,
+                      objects: newValue,
+                    },
+                  },
+                });
+              }}
+            />
+          </Label>
+        </div>
+        <Input
+          ref={inputRef}
+          className="hidden"
+          type="file"
+          onChange={handleChange}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-2">
       <img
@@ -80,3 +187,9 @@ export function EditableImageBlock({
     </div>
   );
 }
+
+const hasAnalysis = (
+  block: ImageBlockType | ImageBlockWithAnalysisType
+): block is ImageBlockWithAnalysisType => {
+  return imageBlockModelWithAnalysis.safeParse(block).success;
+};
