@@ -1,5 +1,5 @@
 import { apiFetchers } from "@/src/client/shared/api";
-import { BlogContent } from "@/src/common/model/blog-parser.model";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 import { useState } from "react";
 
 interface CreateVideoResult {

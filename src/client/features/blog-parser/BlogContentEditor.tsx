@@ -5,7 +5,7 @@ import { BlogBlock } from "@/src/client/widgets/blocks/BlogBlock";
 import {
   BlogBlock as BlogBlockType,
   BlogContent,
-} from "@/src/common/model/blog-parser.model";
+} from "@/src/common/model/blog-content.model";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { useState } from "react";
 

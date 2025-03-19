@@ -1,7 +1,7 @@
 import {
   BlogContent,
   blogContentModel,
-} from "@/src/common/model/blog-parser.model";
+} from "@/src/common/model/blog-content.model";
 import { BlogSequencer } from "@/src/server/blog-sequencer/blog-sequencer.interface";
 import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod";

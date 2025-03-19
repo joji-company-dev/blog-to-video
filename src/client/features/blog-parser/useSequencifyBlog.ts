@@ -2,7 +2,7 @@ import { sequencifyBlogFetcher } from "@/src/client/shared/api/sequencify-blog/f
 import {
   BlogContent,
   blogContentModel,
-} from "@/src/common/model/blog-parser.model";
+} from "@/src/common/model/blog-content.model";
 import { useMutation } from "@tanstack/react-query";
 
 export function useSequencifyBlog() {

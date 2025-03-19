@@ -1,4 +1,4 @@
-import { blogContentModel } from "@/src/common/model/blog-parser.model";
+import { blogContentModel } from "@/src/common/model/blog-content.model";
 import { OpenaiBlogSequencer } from "@/src/server/blog-sequencer/openai-blog-sequencer";
 
 export async function POST(request: Request) {

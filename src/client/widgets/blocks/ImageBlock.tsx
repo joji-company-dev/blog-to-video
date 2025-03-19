@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Input } from "@/src/client/shared/shadcn/components/input";
-import { ImageBlock as ImageBlockType } from "@/src/common/model/blog-parser.model";
+import { ImageBlock as ImageBlockType } from "@/src/common/model/blocks";
 import { useRef } from "react";
 
 interface ImageBlockProps<IsEditable extends boolean> {
