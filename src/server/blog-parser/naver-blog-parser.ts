@@ -158,6 +158,7 @@ export class NaverBlogParser implements BlogParser {
       value: {
         src: src ?? "",
       },
+      duration: 0,
     });
 
     return imageBlock;
@@ -176,6 +177,7 @@ export class NaverBlogParser implements BlogParser {
     const textBlock = textBlockModel.parse({
       type: "text",
       value: trimmedText,
+      duration: 0,
     });
 
     return textBlock;
