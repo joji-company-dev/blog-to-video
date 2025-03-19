@@ -49,15 +49,12 @@ export class FFmpegVideoConverter implements VideoConverter {
     try {
       const videoJob = this.#blogToVideoService.createVideoJob(blogContent);
 
-      // 2. 비디오 작업 등록
-      this.#videoJobWorkerService.registerJob(videoJob);
-
-      // 3. 작업 큐에 비디오 생성 작업 추가
+      // 1. 작업 큐에 비디오 생성 작업 추가
       this.#taskQueue.add(() =>
-        this.#videoJobWorkerService.processJob(videoJob)
+        this.#videoJobWorkerService.enqueueJob(videoJob)
       );
 
-      // 4. 작업 큐 처리 시작 (이미 처리 중이 아니라면)
+      // 2. 작업 큐 처리 시작 (이미 처리 중이 아니라면)
       if (!this.#taskQueue.processingTask) {
         this.#taskQueue.process().catch(console.error);
       }
