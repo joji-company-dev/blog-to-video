@@ -26,6 +26,10 @@ export class OpenaiBlogSequencer implements BlogSequencer {
           content: sequencifySystemPrompt,
         },
         {
+          role: "system",
+          content: "출력 언어: 한국어",
+        },
+        {
           role: "user",
           content: JSON.stringify(blog),
         },
@@ -48,8 +52,7 @@ export class OpenaiBlogSequencer implements BlogSequencer {
 }
 
 const sequencifySystemPrompt = `
-You are a helpful assistant that can help with sequencing blog posts into video sequences.
-You will be given a blog post and you will need to help with writing the blog post.
-Each TextBlock and ImageBlock should be combined into appropriate Text-Image blocks.
-Language: Korean
+당신은 블로그 게시물을 비디오 시퀀스로 변환하는 것을 도와주는 도우미입니다.
+블로그 게시물이 주어지면 해당 게시물을 작성하는 것을 도와주어야 합니다.
+각각의 TextBlock과 ImageBlock은 적절한 Text-Image 블록으로 결합되어야 합니다.
 `;

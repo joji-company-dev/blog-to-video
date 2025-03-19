@@ -117,9 +117,8 @@ export class ImageAnalyzerImpl implements ImageAnalyzer {
 
   async analyzeImage(imageSrc: string): Promise<ImageAnalysis> {
     const analyzeImageSystemPrompt = `
-    You are a helpful assistant that can help with analyzing images.
-    You will be given an image and you will need to help with analyzing the image.
-    Language: Korean
+    당신은 이미지 분석을 도와주는 도우미입니다.
+    이미지가 주어지면 해당 이미지를 분석하는 것을 도와주어야 합니다.
     `;
     const openai = this.openaiClient.client;
 
@@ -129,6 +128,10 @@ export class ImageAnalyzerImpl implements ImageAnalyzer {
         {
           role: "system",
           content: analyzeImageSystemPrompt,
+        },
+        {
+          role: "system",
+          content: "출력 언어: 한국어",
         },
         {
           role: "user",
