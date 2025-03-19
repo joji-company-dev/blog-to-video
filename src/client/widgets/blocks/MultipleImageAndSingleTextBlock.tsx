@@ -1,3 +1,6 @@
+import { Input } from "@/src/client/shared/shadcn/components/input";
+import { Label } from "@/src/client/shared/shadcn/components/label";
+import { TypographySmall } from "@/src/client/shared/shadcn/components/typography";
 import { ImageBlock } from "@/src/client/widgets/blocks/ImageBlock";
 import { TextBlock } from "@/src/client/widgets/blocks/TextBlock";
 import { MultipleImageAndSingleTextBlock as MultipleImageAndSingleTextBlockType } from "@/src/common/model/blocks";
@@ -32,9 +35,22 @@ function EditableMultipleImageAndSingleTextBlock({
   block,
   onChange,
 }: Omit<MultipleImageAndSingleTextBlockProps<true>, "isEditable">) {
-  const { imageBlocks, textBlock } = block;
+  const { imageBlocks, textBlock, duration } = block;
   return (
     <div>
+      <div className="p-2">
+        <Label>
+          <TypographySmall>duration(초):</TypographySmall>
+          <Input
+            type="number"
+            value={duration}
+            onChange={(e) => {
+              onChange?.({ ...block, duration: parseInt(e.target.value) });
+            }}
+          />
+        </Label>
+      </div>
+
       <div className="flex gap-4">
         <div className="space-y-2">
           {imageBlocks.map((imageBlock, index) => (
@@ -58,6 +74,7 @@ function EditableMultipleImageAndSingleTextBlock({
           <TextBlock
             block={textBlock}
             isEditable={true}
+            isShowDuration={false}
             onChange={(newTextBlock) => {
               onChange?.({
                 ...block,
@@ -74,19 +91,31 @@ function EditableMultipleImageAndSingleTextBlock({
 function ReadOnlyMultipleImageAndSingleTextBlock({
   block,
 }: Omit<MultipleImageAndSingleTextBlockProps<false>, "isEditable">) {
-  const { imageBlocks, textBlock } = block;
+  const { imageBlocks, textBlock, duration } = block;
 
   return (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        {imageBlocks.map((imageBlock, index) => (
-          <div key={index} className="rounded-lg border p-2">
-            <ImageBlock block={imageBlock} isEditable={false} />
-          </div>
-        ))}
+    <div>
+      <div className="p-2">
+        <Label>
+          <TypographySmall>duration(초):</TypographySmall>
+          {duration}초
+        </Label>
       </div>
-      <div>
-        <TextBlock block={textBlock} isEditable={false} />
+      <div className="flex gap-4">
+        <div className="space-y-2">
+          {imageBlocks.map((imageBlock, index) => (
+            <div key={index} className="rounded-lg border p-2">
+              <ImageBlock block={imageBlock} isEditable={false} />
+            </div>
+          ))}
+        </div>
+        <div>
+          <TextBlock
+            block={textBlock}
+            isEditable={false}
+            isShowDuration={false}
+          />
+        </div>
       </div>
     </div>
   );
