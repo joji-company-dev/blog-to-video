@@ -144,6 +144,10 @@ export class VideoRenderOptionsManager {
    * 해상도 설정
    */
   setResolution(width: number, height: number): void {
+    if (width < 320 || height < 240) {
+      throw new Error("Resolution must be greater than 320x240");
+    }
+
     this.#options.resolution = { width, height };
     this.#options.orientation = width > height ? "landscape" : "portrait";
 
