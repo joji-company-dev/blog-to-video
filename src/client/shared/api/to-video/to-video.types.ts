@@ -1,4 +1,4 @@
-import { BlogContent } from "@/src/common/model/blog-parser.model";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 
 // 요청 타입
 export interface CreateVideoRequest {

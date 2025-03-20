@@ -1,7 +1,7 @@
 import { Separator } from "@/src/client/shared/shadcn/components/separator";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
 import { BlogBlock } from "@/src/client/widgets/blocks/BlogBlock";
-import { BlogContent } from "@/src/common/model/blog-parser.model";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 
 interface BlogContentViewerProps {
   block: BlogContent;

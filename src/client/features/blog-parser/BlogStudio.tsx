@@ -5,7 +5,7 @@ import { useParseBlog } from "@/src/client/features/blog-parser/useParseBlog";
 import { useSequencifyBlog } from "@/src/client/features/blog-parser/useSequencifyBlog";
 import { Button } from "@/src/client/shared/shadcn/components/button";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
-import { BlogContent } from "@/src/common/model/blog-parser.model";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BounceLoader } from "react-spinners";

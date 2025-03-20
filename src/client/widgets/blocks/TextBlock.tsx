@@ -1,6 +1,6 @@
 import { Textarea } from "@/src/client/shared/shadcn/components/textarea";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
-import { TextBlock as TextBlockType } from "@/src/common/model/blog-parser.model";
+import { TextBlock as TextBlockType } from "@/src/common/model/blocks";
 
 export interface TextBlockProps<IsEditable extends boolean> {
   block: TextBlockType;

@@ -1,9 +1,5 @@
-import {
-  BlogBlock,
-  BlogContent,
-  ImageBlock,
-  TextBlock,
-} from "@/src/common/model/blog-parser.model";
+import { BlogBlock, ImageBlock, TextBlock } from "@/src/common/model/blocks";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 import puppeteer, { Browser, ElementHandle, Page } from "puppeteer";
 import { log } from "../utils/logger.utils";
 import { mergeLineBreak } from "../utils/text.utils";

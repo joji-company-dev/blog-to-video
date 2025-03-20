@@ -2,10 +2,8 @@ import { Button } from "@/src/client/shared/shadcn/components/button";
 import { Input } from "@/src/client/shared/shadcn/components/input";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
 import { BlogBlock } from "@/src/client/widgets/blocks/BlogBlock";
-import {
-  BlogBlock as BlogBlockType,
-  BlogContent,
-} from "@/src/common/model/blog-parser.model";
+import { BlogBlock as BlogBlockType } from "@/src/common/model/blocks";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { useState } from "react";
 

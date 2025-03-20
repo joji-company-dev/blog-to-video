@@ -1,7 +1,7 @@
 import {
   BlogContent,
   blogContentModel,
-} from "@/src/common/model/blog-parser.model";
+} from "@/src/common/model/blog-content.model";
 import { VideoRequestResult } from "@/src/common/model/video-request-result";
 import { FFmpegVideoConverter } from "@/src/server/video-converter";
 

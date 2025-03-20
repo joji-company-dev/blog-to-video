@@ -1,4 +1,5 @@
-import { BlogBlock, BlogContent } from "@/src/common/model/blog-parser.model";
+import { BlogBlock } from "@/src/common/model/blocks";
+import { BlogContent } from "@/src/common/model/blog-content.model";
 import { v4 as uuidv4 } from "uuid";
 import { VideoCut } from "../model/video-cut.model";
 import { VideoJob } from "../model/video-job.model";

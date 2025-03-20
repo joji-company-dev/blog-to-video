@@ -175,7 +175,7 @@ export function TypographySmall({
 }: React.HTMLAttributes<HTMLElement>) {
   return (
     <small
-      className={cn("text-sm font-medium leading-none", className)}
+      className={cn("text-sm font-medium leading-tight", className)}
       {...props}
     >
       {children}

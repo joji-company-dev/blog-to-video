@@ -3,7 +3,7 @@ import { MultipleImageAndSingleTextBlock } from "@/src/client/widgets/blocks/Mul
 import { SingleImageAndMultipleTextBlock } from "@/src/client/widgets/blocks/SingleImageAndMultipleTextBlock";
 import { SingleImageAndSingleTextBlock } from "@/src/client/widgets/blocks/SingleImageAndSingleTextBlock";
 import { TextBlock } from "@/src/client/widgets/blocks/TextBlock";
-import { BlogBlock as BlogBlockType } from "@/src/common/model/blog-parser.model";
+import { BlogBlock as BlogBlockType } from "@/src/common/model/blocks";
 
 interface BlogBlockProps {
   block: BlogBlockType;

@@ -1,5 +1,6 @@
-import { blogContentModel } from "@/src/common/model/blog-parser.model";
-import { OpenaiBlogSequencer } from "@/src/server/blog-sequencer/openai-blog-sequencer";
+import { blogContentModel } from "@/src/common/model/blog-content.model";
+import { BlogAnalyzerImpl } from "@/src/server/blog-analyzer";
+import { BlogSequencerFactory } from "@/src/server/blog-sequencer";
 
 export async function POST(request: Request) {
   const { content } = await request.json();
@@ -10,9 +11,13 @@ export async function POST(request: Request) {
 
   const blogContent = blogContentModel.parse(content);
 
-  const sequencer = new OpenaiBlogSequencer();
+  const sequencer = BlogSequencerFactory.create("openai");
+  const analyzer = new BlogAnalyzerImpl();
   try {
-    const sequencedBlogContent = await sequencer.sequencify(blogContent);
+    const analyzedBlogContent = await analyzer.analyzeBlogContent(blogContent);
+    const sequencedBlogContent = await sequencer.sequencify(
+      analyzedBlogContent
+    );
 
     return new Response(
       JSON.stringify({

@@ -1,6 +1,6 @@
 import { ImageBlock } from "@/src/client/widgets/blocks/ImageBlock";
 import { TextBlock } from "@/src/client/widgets/blocks/TextBlock";
-import { SingleImageAndSingleTextBlock as SingleImageAndSingleTextBlockType } from "@/src/common/model/blog-parser.model";
+import { SingleImageAndSingleTextBlock as SingleImageAndSingleTextBlockType } from "@/src/common/model/blocks";
 
 interface SingleImageAndSingleTextBlockProps<IsEditable extends boolean> {
   block: SingleImageAndSingleTextBlockType;

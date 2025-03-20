@@ -1,15 +1,15 @@
 import { sequencifyBlogFetcher } from "@/src/client/shared/api/sequencify-blog/fetcher";
 import {
   BlogContent,
-  blogContentModel,
-} from "@/src/common/model/blog-parser.model";
+  blogContentModelWithAnalysis,
+} from "@/src/common/model/blog-content.model";
 import { useMutation } from "@tanstack/react-query";
 
 export function useSequencifyBlog() {
   const { data, mutateAsync, isPending, error } = useMutation({
     mutationFn: (content: BlogContent) =>
       sequencifyBlogFetcher({ body: { content } }).then((res) =>
-        blogContentModel.parse(res.data)
+        blogContentModelWithAnalysis.parse(res.data)
       ),
   });
 

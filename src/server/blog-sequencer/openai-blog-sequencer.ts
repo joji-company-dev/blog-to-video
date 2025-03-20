@@ -1,7 +1,7 @@
 import {
-  BlogContent,
-  blogContentModel,
-} from "@/src/common/model/blog-parser.model";
+  blogContentModelWithAnalysis,
+  BlogContentWithAnalysis,
+} from "@/src/common/model/blog-content.model";
 import { BlogSequencer } from "@/src/server/blog-sequencer/blog-sequencer.interface";
 import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod";
@@ -13,21 +13,28 @@ export class OpenaiBlogSequencer implements BlogSequencer {
     this.openaiClient = new OpenaiClient();
   }
 
-  async sequencify(blog: BlogContent): Promise<BlogContent> {
+  async sequencify(
+    blog: BlogContentWithAnalysis
+  ): Promise<BlogContentWithAnalysis> {
     const openai = this.openaiClient.client;
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-2024-11-20",
       messages: [
         {
           role: "system",
-          content: systemPrompt,
+          content: sequencifySystemPrompt,
+        },
+        {
+          role: "system",
+          content: "출력 언어: 한국어",
         },
         {
           role: "user",
           content: JSON.stringify(blog),
         },
       ],
-      response_format: zodResponseFormat(blogContentModel, "blog"),
+      response_format: zodResponseFormat(blogContentModelWithAnalysis, "blog"),
     });
 
     const content = response.choices[0].message.content;
@@ -36,14 +43,16 @@ export class OpenaiBlogSequencer implements BlogSequencer {
       throw new Error("No content returned from OpenAI");
     }
 
-    const parsedContent = blogContentModel.parse(JSON.parse(content));
+    const parsedContent = blogContentModelWithAnalysis.parse(
+      JSON.parse(content)
+    );
 
     return parsedContent;
   }
 }
 
-const systemPrompt = `
-You are a helpful assistant that can help with sequencing blog posts into video sequences.
-You will be given a blog post and you will need to help with writing the blog post.
-Each TextBlock and ImageBlock should be combined into appropriate Text-Image blocks.
+const sequencifySystemPrompt = `
+당신은 블로그 게시물을 비디오 시퀀스로 변환하는 것을 도와주는 도우미입니다.
+블로그 게시물이 주어지면 해당 게시물을 작성하는 것을 도와주어야 합니다.
+각각의 TextBlock과 ImageBlock은 적절한 Text-Image 블록으로 결합되어야 합니다.
 `;
