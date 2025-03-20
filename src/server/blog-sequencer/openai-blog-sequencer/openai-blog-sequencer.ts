@@ -2,11 +2,10 @@ import {
   blogContentModelWithAnalysis,
   BlogContentWithAnalysis,
 } from "@/src/common/model/blog-content.model";
-import { BlogSequencer } from "@/src/server/blog-sequencer/blog-sequencer.interface";
 import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-export class OpenaiBlogSequencer implements BlogSequencer {
+export class OpenaiBlogSequencer {
   private openaiClient: OpenaiClient;
 
   constructor() {
