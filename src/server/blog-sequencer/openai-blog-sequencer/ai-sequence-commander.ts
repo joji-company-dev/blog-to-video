@@ -5,7 +5,7 @@ import {
 import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-export class OpenaiBlogSequencer {
+export class AiSequenceCommander {
   private openaiClient: OpenaiClient;
 
   constructor() {

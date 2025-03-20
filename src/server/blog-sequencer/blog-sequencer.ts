@@ -1,20 +1,20 @@
 import { BlogContentWithAnalysis } from "@/src/common/model/blog-content.model";
-import { OpenaiBlogSequencer } from "@/src/server/blog-sequencer/openai-blog-sequencer/openai-blog-sequencer";
+import { AiSequenceCommander } from "@/src/server/blog-sequencer/openai-blog-sequencer/ai-sequence-commander";
 
 export interface BlogSequencer {
   sequencify(blog: BlogContentWithAnalysis): Promise<BlogContentWithAnalysis>;
 }
 
 export class BlogSequencerImpl implements BlogSequencer {
-  private readonly openaiBlogSequencer: OpenaiBlogSequencer;
+  private readonly aiSequenceCommander: AiSequenceCommander;
 
-  constructor(openaiBlogSequencer?: OpenaiBlogSequencer) {
-    this.openaiBlogSequencer = openaiBlogSequencer ?? new OpenaiBlogSequencer();
+  constructor(openaiBlogSequencer?: AiSequenceCommander) {
+    this.aiSequenceCommander = openaiBlogSequencer ?? new AiSequenceCommander();
   }
 
   async sequencify(
     blog: BlogContentWithAnalysis
   ): Promise<BlogContentWithAnalysis> {
-    return this.openaiBlogSequencer.sequencify(blog);
+    return this.aiSequenceCommander.sequencify(blog);
   }
 }
