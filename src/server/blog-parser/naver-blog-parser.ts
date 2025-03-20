@@ -37,8 +37,10 @@ export class NaverBlogParser implements BlogParser {
     log("🚀 네이버 블로그 파싱 시작:", url);
     await this.initialize();
 
-    await this.navigateToIframe(url);
-    const seViewerEl = await this.getSeViewer();
+    await this.page!.goto(url, { waitUntil: "networkidle0" });
+    log("📄 블로그 페이지 로딩 완료");
+
+    const seViewerEl = await this.getSeViewerEl();
     const { documentTitleEl, mainContainerEl } = await this.getContentElements(
       seViewerEl
     );
@@ -54,10 +56,25 @@ export class NaverBlogParser implements BlogParser {
     return { title, blocks };
   }
 
-  private async navigateToIframe(url: string): Promise<void> {
-    await this.page!.goto(url, { waitUntil: "networkidle0" });
-    log("📄 블로그 페이지 로딩 완료");
+  private async getSeViewerEl(): Promise<ElementHandle<Element>> {
+    let seViewerEl: ElementHandle<Element> | null = null;
+    try {
+      seViewerEl = await this.getSeViewer();
+    } catch {
+      log("🔍 본문 컨테이너(.se-viewer) 찾기 실패");
+      log("🔍 Iframe으로 이동하여 본문 컨테이너 찾기 시작");
+      await this.navigateToIframe();
+      seViewerEl = await this.getSeViewer();
+    }
 
+    if (!seViewerEl) {
+      throw new Error("❌ 본문 컨테이너(.se-viewer)을 찾을 수 없습니다.");
+    }
+
+    return seViewerEl;
+  }
+
+  private async navigateToIframe(): Promise<void> {
     const iframe = await this.page?.locator("iframe").waitHandle();
     if (!iframe) {
       throw new Error("iframe을 찾을 수 없습니다.");
@@ -72,7 +89,9 @@ export class NaverBlogParser implements BlogParser {
   }
 
   private async getSeViewer() {
-    await this.page!.waitForSelector(".se-viewer");
+    await this.page!.waitForSelector(".se-viewer", {
+      timeout: 2000,
+    });
     log("🔍 본문 컨테이너(.se-viewer) 찾기 완료");
 
     const seViewerEl = await this.page?.$(".se-viewer");
