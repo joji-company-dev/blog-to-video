@@ -1,3 +1,4 @@
+import { commonBlockModel } from "@/src/common/model/blocks/common-block.model";
 import { z } from "zod";
 import {
   imageBlockModel,
@@ -5,9 +6,8 @@ import {
 } from "./image-block.model";
 import { textBlockModel } from "./text-block.model";
 
-export const multipleImageAndSingleTextBlockModel = z.object({
+export const multipleImageAndSingleTextBlockModel = commonBlockModel.extend({
   type: z.literal("multipleImageAndSingleText"),
-  duration: z.number(),
   imageBlocks: z.array(imageBlockModel),
   textBlock: textBlockModel,
 });

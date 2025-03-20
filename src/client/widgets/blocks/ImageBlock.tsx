@@ -21,6 +21,7 @@ import { useRef } from "react";
 interface ImageBlockProps<IsEditable extends boolean> {
   block: ImageBlockType | ImageBlockWithAnalysisType;
   isEditable: IsEditable;
+  isShowDuration?: boolean;
   onChange?: IsEditable extends true
     ? (block: ImageBlockType | ImageBlockWithAnalysisType) => void
     : never;
@@ -29,51 +30,62 @@ interface ImageBlockProps<IsEditable extends boolean> {
 export function ImageBlock<IsEditable extends boolean>({
   block,
   isEditable,
+  isShowDuration = true,
   onChange,
 }: ImageBlockProps<IsEditable>) {
   if (isEditable) {
-    return <EditableImageBlock block={block} onChange={onChange} />;
+    return (
+      <EditableImageBlock
+        isShowDuration={isShowDuration}
+        block={block}
+        onChange={onChange}
+      />
+    );
   }
-  return <ReadOnlyImageBlock block={block} />;
+  return <ReadOnlyImageBlock block={block} isShowDuration={isShowDuration} />;
 }
 
 export function ReadOnlyImageBlock({
   block,
+  isShowDuration,
 }: Omit<ImageBlockProps<false>, "isEditable" | "onChange">) {
-  if (hasAnalysis(block)) {
-    return (
-      <div className="p-2">
-        <img src={block.value.src} alt="이미지" />
-        <Collapsible className="border border-t-0 p-2 rounded-lg rounded-t-none space-y-2">
-          <CollapsibleTrigger className="w-full text-left">
-            <TypographyMuted>이미지 분석 결과 보기</TypographyMuted>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="flex flex-col gap-2">
-              <TypographySmall>
-                <span className="text-muted-foreground">설명:</span>{" "}
-                {block.value.analysis.text}
-              </TypographySmall>
-              <TypographySmall>
-                <span className="text-muted-foreground">키워드:</span>{" "}
-                {block.value.analysis.objects.join(", ")}
-              </TypographySmall>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-    );
-  }
-
   return (
     <div className="p-2">
-      <img src={block.value.src} alt="이미지" />
+      <div className="flex flex-col gap-2">
+        {isShowDuration && (
+          <TypographySmall>
+            <span className="text-muted-foreground">duration(초):</span>{" "}
+            {block.duration}초
+          </TypographySmall>
+        )}
+        <img src={block.value.src} alt="이미지" />
+        {hasAnalysis(block) && (
+          <Collapsible className="border border-t-0 p-2 rounded-lg rounded-t-none space-y-2">
+            <CollapsibleTrigger className="w-full text-left">
+              <TypographyMuted>이미지 분석 결과 보기</TypographyMuted>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="flex flex-col gap-2">
+                <TypographySmall>
+                  <span className="text-muted-foreground">설명:</span>{" "}
+                  {block.value.analysis.text}
+                </TypographySmall>
+                <TypographySmall>
+                  <span className="text-muted-foreground">키워드:</span>{" "}
+                  {block.value.analysis.objects.join(", ")}
+                </TypographySmall>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+      </div>
     </div>
   );
 }
 
 export function EditableImageBlock({
   block,
+  isShowDuration,
   onChange,
 }: Omit<ImageBlockProps<true>, "isEditable">) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -93,7 +105,6 @@ export function EditableImageBlock({
     const reader = new FileReader();
     reader.onload = (e) => {
       if (!e.target?.result) return;
-      console.log(e.target.result);
       onChange?.({
         ...block,
         value: {
@@ -105,79 +116,77 @@ export function EditableImageBlock({
     reader.readAsDataURL(file);
   };
 
-  if (hasAnalysis(block)) {
-    return (
-      <div className="p-2">
+  return (
+    <div className="p-2">
+      <div className="flex flex-col gap-2">
+        {isShowDuration && (
+          <div>
+            <span className="text-muted-foreground">duration(초):</span>{" "}
+            <Input
+              type="number"
+              value={block.duration}
+              onChange={(e) => {
+                onChange?.({ ...block, duration: parseInt(e.target.value) });
+              }}
+            />
+          </div>
+        )}
         <img
           src={block.value.src}
           alt="이미지"
           className="cursor-pointer hover:opacity-80"
           onClick={() => inputRef.current?.click()}
         />
-        <div className="flex flex-col gap-2">
-          <TypographySmall>이미지 분석 결과</TypographySmall>
-          <Label>
-            <TypographySmall>설명</TypographySmall>
-            <Textarea
-              defaultValue={block.value.analysis.text}
-              onBlur={(e) => {
-                const newValue = e.target.value.trim();
-                e.target.value = newValue;
-                onChange?.({
-                  ...block,
-                  value: {
-                    ...block.value,
-                    analysis: {
-                      ...block.value.analysis,
-                      text: newValue,
-                    },
-                  },
-                });
-              }}
-            />
-          </Label>
-          <Label>
-            <TypographySmall>키워드</TypographySmall>
-            <Textarea
-              defaultValue={block.value.analysis.objects.join(", ")}
-              onBlur={(e) => {
-                const newValue = e.target.value
-                  .split(",")
-                  .map((text) => text.trim())
-                  .filter(Boolean);
-                e.target.value = newValue.join(", ");
-                onChange?.({
-                  ...block,
-                  value: {
-                    ...block.value,
-                    analysis: {
-                      ...block.value.analysis,
-                      objects: newValue,
-                    },
-                  },
-                });
-              }}
-            />
-          </Label>
-        </div>
-        <Input
-          ref={inputRef}
-          className="hidden"
-          type="file"
-          onChange={handleChange}
-        />
-      </div>
-    );
-  }
 
-  return (
-    <div className="p-2">
-      <img
-        src={block.value.src}
-        alt="이미지"
-        className="cursor-pointer hover:opacity-80"
-        onClick={() => inputRef.current?.click()}
-      />
+        {hasAnalysis(block) && (
+          <div className="flex flex-col gap-2">
+            <TypographySmall>이미지 분석 결과</TypographySmall>
+            <Label>
+              <TypographySmall>설명</TypographySmall>
+              <Textarea
+                defaultValue={block.value.analysis.text}
+                onBlur={(e) => {
+                  const newValue = e.target.value.trim();
+                  e.target.value = newValue;
+                  onChange?.({
+                    ...block,
+                    value: {
+                      ...block.value,
+                      analysis: {
+                        ...block.value.analysis,
+                        text: newValue,
+                      },
+                    },
+                  });
+                }}
+              />
+            </Label>
+            <Label>
+              <TypographySmall>키워드</TypographySmall>
+              <Textarea
+                defaultValue={block.value.analysis.objects.join(", ")}
+                onBlur={(e) => {
+                  const newValue = e.target.value
+                    .split(",")
+                    .map((text) => text.trim())
+                    .filter(Boolean);
+                  e.target.value = newValue.join(", ");
+                  onChange?.({
+                    ...block,
+                    value: {
+                      ...block.value,
+                      analysis: {
+                        ...block.value.analysis,
+                        objects: newValue,
+                      },
+                    },
+                  });
+                }}
+              />
+            </Label>
+          </div>
+        )}
+      </div>
       <Input
         ref={inputRef}
         className="hidden"

@@ -1,6 +1,7 @@
+import { commonBlockModel } from "@/src/common/model/blocks/common-block.model";
 import { z } from "zod";
 
-export const textBlockModel = z.object({
+export const textBlockModel = commonBlockModel.extend({
   type: z.literal("text"),
   value: z.string(),
 });

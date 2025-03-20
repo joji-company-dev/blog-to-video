@@ -134,6 +134,7 @@ export class TiStoryBlogParser implements BlogParser {
       {
         type: "text",
         value: trimmedText,
+        duration: 0,
       },
     ];
   }
@@ -156,6 +157,7 @@ export class TiStoryBlogParser implements BlogParser {
     return srcs.map((src) => ({
       type: "image",
       value: { src },
+      duration: 0,
     }));
   }
 

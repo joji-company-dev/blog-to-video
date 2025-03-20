@@ -1,3 +1,5 @@
+import { Label } from "@/src/client/shared/shadcn/components/label";
+import { TypographySmall } from "@/src/client/shared/shadcn/components/typography";
 import { ImageBlock } from "@/src/client/widgets/blocks/ImageBlock";
 import { TextBlock } from "@/src/client/widgets/blocks/TextBlock";
 import { SingleImageAndMultipleTextBlock as SingleImageAndMultipleTextBlockType } from "@/src/common/model/blocks";
@@ -39,6 +41,7 @@ function EditableSingleImageAndMultipleTextBlock({
       <ImageBlock
         block={imageBlock}
         isEditable={true}
+        isShowDuration={false}
         onChange={(newImageBlock) => {
           onChange?.({
             ...block,
@@ -71,16 +74,28 @@ function EditableSingleImageAndMultipleTextBlock({
 function ReadOnlySingleImageAndMultipleTextBlock({
   block,
 }: Omit<SingleImageAndMultipleTextBlockProps<false>, "isEditable">) {
-  const { imageBlock, textBlocks } = block;
+  const { imageBlock, textBlocks, duration } = block;
   return (
-    <div className="flex gap-4">
-      <ImageBlock block={imageBlock} isEditable={false} />
-      <div className="space-y-2">
-        {textBlocks.map((textBlock, index) => (
-          <div key={index} className="rounded-lg border p-2">
-            <TextBlock block={textBlock} isEditable={false} />
-          </div>
-        ))}
+    <div>
+      <div className="p-2">
+        <Label>
+          <TypographySmall>duration(초):</TypographySmall>
+          {duration}초
+        </Label>
+      </div>
+      <div className="flex gap-4">
+        <ImageBlock
+          block={imageBlock}
+          isEditable={false}
+          isShowDuration={false}
+        />
+        <div className="space-y-2">
+          {textBlocks.map((textBlock, index) => (
+            <div key={index} className="rounded-lg border p-2">
+              <TextBlock block={textBlock} isEditable={false} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
