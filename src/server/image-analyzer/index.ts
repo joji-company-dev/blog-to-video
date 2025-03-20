@@ -20,14 +20,19 @@ import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 
 export interface ImageAnalyzer {
-  analyzeBlogContent(blogContent: BlogContent): Promise<BlogContent>;
+  analyzeBlogContent(
+    blogContent: BlogContent
+  ): Promise<BlogContentWithAnalysis>;
   analyzeMultipleImageAndSingleTextBlock(
     block: MultipleImageAndSingleTextBlock
-  ): Promise<MultipleImageAndSingleTextBlock>;
+  ): Promise<MultipleImageAndSingleTextBlockWithAnalysis>;
+  analyzeSingleImageAndMultipleTextBlock(
+    block: SingleImageAndMultipleTextBlock
+  ): Promise<SingleImageAndMultipleTextBlockWithAnalysis>;
   analyzeSingleImageAndSingleTextBlock(
     block: SingleImageAndSingleTextBlock
-  ): Promise<SingleImageAndSingleTextBlock>;
-  analyzeImageBlock(imageBlock: ImageBlock): Promise<ImageBlock>;
+  ): Promise<SingleImageAndSingleTextBlockWithAnalysis>;
+  analyzeImageBlock(imageBlock: ImageBlock): Promise<ImageBlockWithAnalysis>;
   analyzeImage(imageSrc: string): Promise<ImageAnalysis>;
 }
 
