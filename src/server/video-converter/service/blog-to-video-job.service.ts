@@ -62,7 +62,7 @@ export class BlogToVideoJobService {
               sceneId,
               block.imageBlock.value.src,
               textBlock.value,
-              block.duration / block.textBlocks.length
+              textBlock.duration
             )
           );
           break;
@@ -74,19 +74,21 @@ export class BlogToVideoJobService {
               sceneId,
               imageBlock.value.src,
               block.textBlock.value,
-              block.duration / block.imageBlocks.length
+              imageBlock.duration
             )
           );
           break;
 
         case "text":
           // 텍스트만 있는 경우 배경색이 있는 화면에 텍스트 표시
-          cuts = [this.createCutFromText(sceneId, block.value, 3)]; // 기본 3초 지속
+          cuts = [this.createCutFromText(sceneId, block.value, block.duration)];
           break;
 
         case "image":
           // 이미지만 있는 경우
-          cuts = [this.createCutFromImage(sceneId, block.value.src, 3)]; // 기본 3초 지속
+          cuts = [
+            this.createCutFromImage(sceneId, block.value.src, block.duration),
+          ];
           break;
       }
 
