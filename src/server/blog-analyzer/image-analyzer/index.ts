@@ -9,10 +9,6 @@ import {
   SingleImageAndSingleTextBlockWithAnalysis,
 } from "@/src/common/model/blocks";
 import {
-  BlogContent,
-  BlogContentWithAnalysis,
-} from "@/src/common/model/blog-content.model";
-import {
   ImageAnalysis,
   imageAnalysisModel,
 } from "@/src/common/model/image-analysis.model";
@@ -20,9 +16,6 @@ import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 
 export interface ImageAnalyzer {
-  analyzeBlogContent(
-    blogContent: BlogContent
-  ): Promise<BlogContentWithAnalysis>;
   analyzeMultipleImageAndSingleTextBlock(
     block: MultipleImageAndSingleTextBlock
   ): Promise<MultipleImageAndSingleTextBlockWithAnalysis>;
@@ -41,33 +34,6 @@ export class ImageAnalyzerImpl implements ImageAnalyzer {
 
   constructor() {
     this.openaiClient = new OpenaiClient();
-  }
-
-  async analyzeBlogContent(
-    blogContent: BlogContent
-  ): Promise<BlogContentWithAnalysis> {
-    const analyzedBlocks = await Promise.all(
-      blogContent.blocks.map(async (block) => {
-        if (block.type === "image") {
-          return this.analyzeImageBlock(block);
-        }
-        if (block.type === "multipleImageAndSingleText") {
-          return this.analyzeMultipleImageAndSingleTextBlock(block);
-        }
-        if (block.type === "singleImageAndSingleText") {
-          return this.analyzeSingleImageAndSingleTextBlock(block);
-        }
-        if (block.type === "singleImageAndMultipleText") {
-          return this.analyzeSingleImageAndMultipleTextBlock(block);
-        }
-        return block;
-      })
-    );
-
-    return {
-      ...blogContent,
-      blocks: analyzedBlocks,
-    };
   }
 
   async analyzeMultipleImageAndSingleTextBlock(
