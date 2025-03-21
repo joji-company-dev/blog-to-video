@@ -19,11 +19,10 @@ export class BlogSequencerImpl implements BlogSequencer {
   async sequencify(
     blog: BlogContentWithAnalysis
   ): Promise<BlogContentWithAnalysis> {
-    const sequenceCommands = await this.aiSequenceCommander.sequencifyV2(
-      blog.blocks
-    );
-    const newBlogBlocks = [];
+    const sequenceCommands =
+      await this.aiSequenceCommander.generateSequenceCommands(blog.blocks);
 
+    const newBlogBlocks = [];
     for (const command of sequenceCommands) {
       const result = await command.execute(blog);
 
