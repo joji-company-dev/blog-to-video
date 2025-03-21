@@ -2,14 +2,26 @@ import {
   blogContentModelWithAnalysis,
   BlogContentWithAnalysis,
 } from "@/src/common/model/blog-content.model";
+import { SequenceCommand } from "@/src/server/blog-sequencer/commands/sequence-command.interface";
 import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-export class AiSequenceCommander {
+export interface AiSequenceCommander {
+  sequencifyV2(blog: BlogContentWithAnalysis): Promise<SequenceCommand[]>;
+  sequencify(blog: BlogContentWithAnalysis): Promise<BlogContentWithAnalysis>;
+}
+
+export class AiSequenceCommanderImpl implements AiSequenceCommander {
   private openaiClient: OpenaiClient;
 
   constructor() {
     this.openaiClient = new OpenaiClient();
+  }
+
+  async sequencifyV2(
+    blog: BlogContentWithAnalysis
+  ): Promise<SequenceCommand[]> {
+    throw new Error("Not implemented");
   }
 
   async sequencify(
