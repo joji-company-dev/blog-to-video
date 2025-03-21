@@ -1,4 +1,7 @@
-import { BlogContentWithAnalysis } from "@/src/common/model/blog-content.model";
+import {
+  blogContentModelWithAnalysis,
+  BlogContentWithAnalysis,
+} from "@/src/common/model/blog-content.model";
 import { AiSequenceCommanderImpl } from "@/src/server/blog-sequencer/openai-blog-sequencer/ai-sequence-commander";
 
 export interface BlogSequencer {
@@ -16,6 +19,22 @@ export class BlogSequencerImpl implements BlogSequencer {
   async sequencify(
     blog: BlogContentWithAnalysis
   ): Promise<BlogContentWithAnalysis> {
-    return this.aiSequenceCommander.sequencify(blog);
+    const sequenceCommands = await this.aiSequenceCommander.sequencifyV2(
+      blog.blocks
+    );
+    const newBlogBlocks = [];
+
+    for (const command of sequenceCommands) {
+      const result = await command.execute(blog);
+
+      newBlogBlocks.push(result);
+    }
+
+    const newBlog = blogContentModelWithAnalysis.parse({
+      ...blog,
+      blocks: newBlogBlocks,
+    });
+
+    return newBlog;
   }
 }

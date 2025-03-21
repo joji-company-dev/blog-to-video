@@ -1,0 +1,1 @@
+export const TEXT_BLOCK_DURATION_PER_CHARACTER = 0.15;
