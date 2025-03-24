@@ -7,7 +7,6 @@ import { BlogBlock } from "@/src/client/widgets/blocks/BlogBlock";
 import {
   BlogBlock as BlogBlockType,
   BlogBlockWithAnalysis,
-  multipleImageAndMultipleTextBlockModelWithAnalysis,
 } from "@/src/common/model/blocks";
 import { BlogContent } from "@/src/common/model/blog-content.model";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
@@ -72,23 +71,6 @@ export function BlogContentEditor({
     switch (newBlock.type) {
       case "text":
         newBlock = response[0];
-        break;
-      case "multipleImageAndSingleText":
-        newBlock = multipleImageAndMultipleTextBlockModelWithAnalysis.parse({
-          ...newBlock,
-          type: "multipleImageAndMultipleText",
-          imageBlocks: newBlock.imageBlocks,
-          textBlocks: response,
-        });
-        break;
-      case "singleImageAndMultipleText":
-      case "singleImageAndSingleText":
-        newBlock = multipleImageAndMultipleTextBlockModelWithAnalysis.parse({
-          ...newBlock,
-          type: "multipleImageAndMultipleText",
-          imageBlocks: newBlock.imageBlock ? [newBlock.imageBlock] : [],
-          textBlocks: response,
-        });
         break;
       case "multipleImageAndMultipleText":
         newBlock.textBlocks = response;

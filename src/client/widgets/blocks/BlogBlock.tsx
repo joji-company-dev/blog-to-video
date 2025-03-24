@@ -1,8 +1,5 @@
 import { ImageBlock } from "@/src/client/widgets/blocks/ImageBlock";
 import { MultipleImageAndMultipleTextBlock } from "@/src/client/widgets/blocks/MultipleImageAndMultipleTextBlock";
-import { MultipleImageAndSingleTextBlock } from "@/src/client/widgets/blocks/MultipleImageAndSingleTextBlock";
-import { SingleImageAndMultipleTextBlock } from "@/src/client/widgets/blocks/SingleImageAndMultipleTextBlock";
-import { SingleImageAndSingleTextBlock } from "@/src/client/widgets/blocks/SingleImageAndSingleTextBlock";
 import { TextBlock } from "@/src/client/widgets/blocks/TextBlock";
 import { BlogBlock as BlogBlockType } from "@/src/common/model/blocks";
 
@@ -26,30 +23,7 @@ export function BlogBlock({
       return (
         <ImageBlock block={block} isEditable={isEditable} onChange={onChange} />
       );
-    case "singleImageAndSingleText":
-      return (
-        <SingleImageAndSingleTextBlock
-          block={block}
-          isEditable={isEditable}
-          onChange={onChange}
-        />
-      );
-    case "singleImageAndMultipleText":
-      return (
-        <SingleImageAndMultipleTextBlock
-          block={block}
-          isEditable={isEditable}
-          onChange={onChange}
-        />
-      );
-    case "multipleImageAndSingleText":
-      return (
-        <MultipleImageAndSingleTextBlock
-          block={block}
-          isEditable={isEditable}
-          onChange={onChange}
-        />
-      );
+
     case "multipleImageAndMultipleText":
       return (
         <MultipleImageAndMultipleTextBlock

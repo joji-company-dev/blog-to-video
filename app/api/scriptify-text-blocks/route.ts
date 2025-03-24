@@ -50,12 +50,8 @@ const getTextBlocks = (
   switch (targetBlock.type) {
     case "text":
       return [targetBlock];
-    case "singleImageAndSingleText":
-      return [targetBlock.textBlock];
-    case "singleImageAndMultipleText":
+    case "multipleImageAndMultipleText":
       return targetBlock.textBlocks;
-    case "multipleImageAndSingleText":
-      return [targetBlock.textBlock];
     default:
       throw new Error(`targetBlock type is not supported: ${targetBlock.type}`);
   }
