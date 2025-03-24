@@ -34,7 +34,7 @@ export class CreateSingleImageSingleTextCommandImpl implements SequenceCommand {
     );
 
     const totalDuration = Math.round(
-      targetText.value.replaceAll(/<[^>]*>?\\n/g, "").replaceAll(" ", "")
+      targetText.value.replaceAll(/<[^>]*>|\n/g, "").replaceAll(" ", "")
         .length * TEXT_BLOCK_DURATION_PER_CHARACTER
     );
 
