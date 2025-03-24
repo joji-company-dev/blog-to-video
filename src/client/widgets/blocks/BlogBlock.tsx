@@ -1,4 +1,5 @@
 import { ImageBlock } from "@/src/client/widgets/blocks/ImageBlock";
+import { MultipleImageAndMultipleTextBlock } from "@/src/client/widgets/blocks/MultipleImageAndMultipleTextBlock";
 import { MultipleImageAndSingleTextBlock } from "@/src/client/widgets/blocks/MultipleImageAndSingleTextBlock";
 import { SingleImageAndMultipleTextBlock } from "@/src/client/widgets/blocks/SingleImageAndMultipleTextBlock";
 import { SingleImageAndSingleTextBlock } from "@/src/client/widgets/blocks/SingleImageAndSingleTextBlock";
@@ -11,7 +12,6 @@ interface BlogBlockProps {
   onChange?: (block: BlogBlockType) => void;
 }
 
-// TODO: Implement isEditable
 export function BlogBlock({
   block,
   isEditable = false,
@@ -50,6 +50,15 @@ export function BlogBlock({
           onChange={onChange}
         />
       );
+    case "multipleImageAndMultipleText":
+      return (
+        <MultipleImageAndMultipleTextBlock
+          block={block}
+          isEditable={isEditable}
+          onChange={onChange}
+        />
+      );
+
     default:
       throw new Error(`Unknown block: ${JSON.stringify(block)}`);
   }
