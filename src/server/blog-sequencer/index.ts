@@ -1,1 +1,1 @@
-export * from "./blog-sequencer.factory";
+export * from "./blog-sequencer";
