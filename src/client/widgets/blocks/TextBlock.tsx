@@ -64,9 +64,10 @@ export function EditableTextBlock({
             <TypographySmall>duration(초):</TypographySmall>
             <Input
               type="number"
+              step={0.1}
               value={block.duration}
               onChange={(e) =>
-                onChange?.({ ...block, duration: parseInt(e.target.value) })
+                onChange?.({ ...block, duration: parseFloat(e.target.value) })
               }
             />
           </Label>

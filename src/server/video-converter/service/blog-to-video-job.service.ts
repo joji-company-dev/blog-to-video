@@ -1,4 +1,4 @@
-import { BlogBlock } from "@/src/common/model/blocks";
+import { BlogBlock, ImageBlock, TextBlock } from "@/src/common/model/blocks";
 import { BlogContent } from "@/src/common/model/blog-content.model";
 import { v4 as uuidv4 } from "uuid";
 import { VideoCut } from "../model/video-cut.model";
@@ -42,43 +42,18 @@ export class BlogToVideoJobService {
 
       let cuts: VideoCut[] = [];
 
-      // 블록 타입에 따라 다른 처리 로직 적용
       switch (block.type) {
-        case "singleImageAndSingleText":
-          cuts = [
-            this.createCutFromImageAndText(
-              sceneId,
-              block.imageBlock.value.src,
-              block.textBlock.value,
-              block.duration
-            ),
-          ];
-          break;
+        case "multipleImageAndMultipleText":
+          const imageBlocksWithTimeline = this.createTimeline(
+            block.imageBlocks
+          );
+          const textBlocksWithTimeline = this.createTimeline(block.textBlocks);
 
-        case "singleImageAndMultipleText":
-          // 여러 텍스트를 순차적으로 보여주는 컷 생성
-          cuts = block.textBlocks.map((textBlock) =>
-            this.createCutFromImageAndText(
-              sceneId,
-              block.imageBlock.value.src,
-              textBlock.value,
-              textBlock.duration
-            )
+          cuts = this.mergeImageAndTextWithTimeline(
+            imageBlocksWithTimeline,
+            textBlocksWithTimeline
           );
           break;
-
-        case "multipleImageAndSingleText":
-          // 여러 이미지를 순차적으로 보여주는 컷 생성
-          cuts = block.imageBlocks.map((imageBlock) =>
-            this.createCutFromImageAndText(
-              sceneId,
-              imageBlock.value.src,
-              block.textBlock.value,
-              imageBlock.duration
-            )
-          );
-          break;
-
         case "text":
           // 텍스트만 있는 경우 배경색이 있는 화면에 텍스트 표시
           cuts = [this.createCutFromText(sceneId, block.value, block.duration)];
@@ -102,24 +77,6 @@ export class BlogToVideoJobService {
     });
 
     return scenes;
-  }
-
-  /**
-   * 이미지와 텍스트로 구성된 비디오 컷을 생성합니다.
-   */
-  private createCutFromImageAndText(
-    sceneId: string,
-    imageUrl: string,
-    text: string,
-    duration: number
-  ): VideoCut {
-    return {
-      id: uuidv4(),
-      sceneId,
-      duration,
-      imageUrl,
-      text,
-    };
   }
 
   /**
@@ -152,5 +109,38 @@ export class BlogToVideoJobService {
       duration,
       imageUrl,
     };
+  }
+
+  private createTimeline<T extends { duration: number }>(
+    blocks: T[]
+  ): (T & { timeline: number[] })[] {
+    let prevDurations = 0;
+    return blocks.map((block) => {
+      prevDurations += block.duration;
+      return {
+        ...block,
+        timeline: [prevDurations, prevDurations + block.duration],
+      };
+    });
+  }
+
+  private mergeImageAndTextWithTimeline(
+    imageBlocksWithTimeline: (ImageBlock & { timeline: number[] })[],
+    textBlocksWithTimeline: (TextBlock & { timeline: number[] })[]
+  ): VideoCut[] {
+    return imageBlocksWithTimeline.map((imageBlock) => {
+      const textBlock = textBlocksWithTimeline.find(
+        (textBlock) =>
+          textBlock.timeline[0] <= imageBlock.timeline[0] &&
+          textBlock.timeline[1] >= imageBlock.timeline[0]
+      );
+      return {
+        duration: imageBlock.duration,
+        imageUrl: imageBlock.value.src,
+        text: textBlock?.value,
+        id: uuidv4(),
+        sceneId: uuidv4(),
+      };
+    });
   }
 }

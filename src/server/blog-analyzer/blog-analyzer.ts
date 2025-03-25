@@ -1,3 +1,4 @@
+import { multipleImageAndMultipleTextBlockModelWithAnalysis } from "@/src/common/model/blocks";
 import {
   BlogContent,
   BlogContentWithAnalysis,
@@ -28,18 +29,17 @@ export class BlogAnalyzerImpl implements BlogAnalyzer {
         if (block.type === "image") {
           return this.imageAnalyzer.analyzeImageBlock(block);
         }
-        if (block.type === "multipleImageAndSingleText") {
-          return this.imageAnalyzer.analyzeMultipleImageAndSingleTextBlock(
-            block
+        if (block.type === "multipleImageAndMultipleText") {
+          const imageBlocks = await Promise.all(
+            block.imageBlocks.map((imageBlock) =>
+              this.imageAnalyzer.analyzeImageBlock(imageBlock)
+            )
           );
-        }
-        if (block.type === "singleImageAndSingleText") {
-          return this.imageAnalyzer.analyzeSingleImageAndSingleTextBlock(block);
-        }
-        if (block.type === "singleImageAndMultipleText") {
-          return this.imageAnalyzer.analyzeSingleImageAndMultipleTextBlock(
-            block
-          );
+
+          return multipleImageAndMultipleTextBlockModelWithAnalysis.parse({
+            ...block,
+            imageBlocks,
+          });
         }
         return block;
       })

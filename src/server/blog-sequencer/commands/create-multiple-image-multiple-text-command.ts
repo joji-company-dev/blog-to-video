@@ -1,6 +1,6 @@
 import {
   imageBlockModelWithAnalysis,
-  SingleImageAndMultipleTextBlockWithAnalysis,
+  MultipleImageAndMultipleTextBlockWithAnalysis,
   TextBlock,
   textBlockModelWithAnalysis,
 } from "@/src/common/model/blocks";
@@ -9,31 +9,34 @@ import { TEXT_BLOCK_DURATION_PER_CHARACTER } from "@/src/server/blog-sequencer/c
 import { SequenceCommand } from "@/src/server/blog-sequencer/commands/sequence-command.interface";
 import { z } from "zod";
 
-export const createSingleImageMultipleTextCommandArgsModel = z.object({
-  type: z.literal("createSingleImageMultipleText"),
-  targetImageIndex: z.number(),
+export const createMultipleImageMultipleTextCommandArgsModel = z.object({
+  type: z.literal("createMultipleImageMultipleText"),
+  targetImageIndexes: z.array(z.number()),
   targetTextIndexes: z.array(z.number()),
 });
 
-export type CreateSingleImageMultipleTextCommandArgs = z.infer<
-  typeof createSingleImageMultipleTextCommandArgsModel
+export type CreateMultipleImageMultipleTextCommandArgs = z.infer<
+  typeof createMultipleImageMultipleTextCommandArgsModel
 >;
 
-export class CreateSingleImageMultipleTextCommandImpl
+export class CreateMultipleImageMultipleTextCommandImpl
   implements SequenceCommand
 {
   constructor(
-    private readonly args: CreateSingleImageMultipleTextCommandArgs
+    private readonly args: CreateMultipleImageMultipleTextCommandArgs
   ) {}
 
   async execute(
     blogContent: BlogContentWithAnalysis
-  ): Promise<SingleImageAndMultipleTextBlockWithAnalysis> {
-    const { targetImageIndex, targetTextIndexes } = this.args;
+  ): Promise<MultipleImageAndMultipleTextBlockWithAnalysis> {
+    const { targetImageIndexes, targetTextIndexes } = this.args;
 
-    const targetImage = imageBlockModelWithAnalysis.parse(
-      blogContent.blocks[targetImageIndex]
-    );
+    const targetImages = targetImageIndexes.map((index) => {
+      const imageBlock = imageBlockModelWithAnalysis.parse(
+        blogContent.blocks[index]
+      );
+      return imageBlock;
+    });
 
     const targetTexts = targetTextIndexes.map((index) => {
       const textBlock = { ...blogContent.blocks[index] } as TextBlock;
@@ -49,11 +52,14 @@ export class CreateSingleImageMultipleTextCommandImpl
       0
     );
 
-    targetImage.duration = totalDuration;
+    targetImages.forEach((image) => {
+      image.duration = totalDuration / targetImages.length;
+    });
+
     return {
-      type: "singleImageAndMultipleText",
+      type: "multipleImageAndMultipleText",
       duration: totalDuration,
-      imageBlock: targetImage,
+      imageBlocks: targetImages,
       textBlocks: targetTexts,
     };
   }

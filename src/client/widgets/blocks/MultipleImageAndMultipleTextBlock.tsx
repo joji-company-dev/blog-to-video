@@ -3,39 +3,39 @@ import { Label } from "@/src/client/shared/shadcn/components/label";
 import { TypographySmall } from "@/src/client/shared/shadcn/components/typography";
 import { ImageBlock } from "@/src/client/widgets/blocks/ImageBlock";
 import { TextBlock } from "@/src/client/widgets/blocks/TextBlock";
-import { MultipleImageAndSingleTextBlock as MultipleImageAndSingleTextBlockType } from "@/src/common/model/blocks";
+import { MultipleImageAndMultipleTextBlock as MultipleImageAndMultipleTextBlockType } from "@/src/common/model/blocks";
 
-export interface MultipleImageAndSingleTextBlockProps<
+export interface MultipleImageAndMultipleTextBlockProps<
   IsEditable extends boolean
 > {
-  block: MultipleImageAndSingleTextBlockType;
+  block: MultipleImageAndMultipleTextBlockType;
   isEditable: IsEditable;
   onChange?: IsEditable extends true
-    ? (block: MultipleImageAndSingleTextBlockType) => void
+    ? (block: MultipleImageAndMultipleTextBlockType) => void
     : never;
 }
 
-export function MultipleImageAndSingleTextBlock<IsEditable extends boolean>({
+export function MultipleImageAndMultipleTextBlock<IsEditable extends boolean>({
   block,
   isEditable,
   onChange,
-}: MultipleImageAndSingleTextBlockProps<IsEditable>) {
+}: MultipleImageAndMultipleTextBlockProps<IsEditable>) {
   if (isEditable) {
     return (
-      <EditableMultipleImageAndSingleTextBlock
+      <EditableMultipleImageAndMultipleTextBlock
         block={block}
         onChange={onChange}
       />
     );
   }
-  return <ReadOnlyMultipleImageAndSingleTextBlock block={block} />;
+  return <ReadOnlyMultipleImageAndMultipleTextBlock block={block} />;
 }
 
-function EditableMultipleImageAndSingleTextBlock({
+function EditableMultipleImageAndMultipleTextBlock({
   block,
   onChange,
-}: Omit<MultipleImageAndSingleTextBlockProps<true>, "isEditable">) {
-  const { imageBlocks, textBlock, duration } = block;
+}: Omit<MultipleImageAndMultipleTextBlockProps<true>, "isEditable">) {
+  const { imageBlocks, textBlocks, duration } = block;
   return (
     <div>
       <div className="p-2">
@@ -43,9 +43,10 @@ function EditableMultipleImageAndSingleTextBlock({
           <TypographySmall>duration(초):</TypographySmall>
           <Input
             type="number"
+            step={0.1}
             value={duration}
             onChange={(e) => {
-              onChange?.({ ...block, duration: parseInt(e.target.value) });
+              onChange?.({ ...block, duration: parseFloat(e.target.value) });
             }}
           />
         </Label>
@@ -70,28 +71,33 @@ function EditableMultipleImageAndSingleTextBlock({
             </div>
           ))}
         </div>
-        <div>
-          <TextBlock
-            block={textBlock}
-            isEditable={true}
-            isShowDuration={false}
-            onChange={(newTextBlock) => {
-              onChange?.({
-                ...block,
-                textBlock: newTextBlock,
-              });
-            }}
-          />
+        <div className="space-y-2">
+          {textBlocks.map((textBlock, index) => (
+            <div key={index} className="rounded-lg border p-2">
+              <TextBlock
+                block={textBlock}
+                isEditable={true}
+                onChange={(newTextBlock) => {
+                  onChange?.({
+                    ...block,
+                    textBlocks: textBlocks.map((_, i) =>
+                      i === index ? newTextBlock : _
+                    ),
+                  });
+                }}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-function ReadOnlyMultipleImageAndSingleTextBlock({
+function ReadOnlyMultipleImageAndMultipleTextBlock({
   block,
-}: Omit<MultipleImageAndSingleTextBlockProps<false>, "isEditable">) {
-  const { imageBlocks, textBlock, duration } = block;
+}: Omit<MultipleImageAndMultipleTextBlockProps<false>, "isEditable">) {
+  const { imageBlocks, textBlocks, duration } = block;
 
   return (
     <div>
@@ -109,12 +115,12 @@ function ReadOnlyMultipleImageAndSingleTextBlock({
             </div>
           ))}
         </div>
-        <div>
-          <TextBlock
-            block={textBlock}
-            isEditable={false}
-            isShowDuration={false}
-          />
+        <div className="space-y-2">
+          {textBlocks.map((textBlock, index) => (
+            <div key={index} className="rounded-lg border p-2">
+              <TextBlock block={textBlock} isEditable={false} />
+            </div>
+          ))}
         </div>
       </div>
     </div>

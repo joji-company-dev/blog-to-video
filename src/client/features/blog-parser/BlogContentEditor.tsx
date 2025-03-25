@@ -1,8 +1,13 @@
+import { useScriptifyTextBlocks } from "@/src/client/features/blog-parser/useScriptifyTextBlocks";
 import { Button } from "@/src/client/shared/shadcn/components/button";
+import { ButtonWithLoading } from "@/src/client/shared/shadcn/components/button-with-loading";
 import { Input } from "@/src/client/shared/shadcn/components/input";
 import { Typography } from "@/src/client/shared/shadcn/components/typography";
 import { BlogBlock } from "@/src/client/widgets/blocks/BlogBlock";
-import { BlogBlock as BlogBlockType } from "@/src/common/model/blocks";
+import {
+  BlogBlock as BlogBlockType,
+  BlogBlockWithAnalysis,
+} from "@/src/common/model/blocks";
 import { BlogContent } from "@/src/common/model/blog-content.model";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { useState } from "react";
@@ -10,6 +15,7 @@ import { useState } from "react";
 interface BlogContentEditorProps {
   initialContent: BlogContent;
   onSave: (content: BlogContent) => void;
+
   onCancel: () => void;
 }
 
@@ -19,6 +25,8 @@ export function BlogContentEditor({
   onCancel,
 }: BlogContentEditorProps) {
   const [content, setContent] = useState(initialContent);
+  const { scriptifyTextBlocks } = useScriptifyTextBlocks();
+
   const { title, blocks } = content;
 
   const handleBlockChange = (index: number, updatedBlock: BlogBlockType) => {
@@ -52,6 +60,28 @@ export function BlogContentEditor({
       newBlocks[index],
     ];
     setContent({ ...content, blocks: newBlocks });
+  };
+
+  const handleScriptify = async (blogBlock: BlogBlockType, index: number) => {
+    let newBlock = { ...blogBlock };
+    const response = await scriptifyTextBlocks(
+      blogBlock as BlogBlockWithAnalysis
+    );
+
+    switch (newBlock.type) {
+      case "text":
+        newBlock = response[0];
+        break;
+      case "multipleImageAndMultipleText":
+        newBlock.textBlocks = response;
+        break;
+      default:
+        break;
+    }
+
+    const newBlocks = [...content.blocks];
+    newBlocks[index] = newBlock;
+    setContent((prev) => ({ ...prev, blocks: newBlocks }));
   };
 
   return (
@@ -107,6 +137,12 @@ export function BlogContentEditor({
                 >
                   <Trash size={16} />
                 </Button>
+                <ButtonWithLoading
+                  size="sm"
+                  onClick={async () => handleScriptify(block, index)}
+                >
+                  Scriptify
+                </ButtonWithLoading>
               </div>
 
               <BlogBlock

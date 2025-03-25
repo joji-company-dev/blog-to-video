@@ -1,13 +1,4 @@
-import {
-  ImageBlock,
-  ImageBlockWithAnalysis,
-  MultipleImageAndSingleTextBlock,
-  MultipleImageAndSingleTextBlockWithAnalysis,
-  SingleImageAndMultipleTextBlock,
-  SingleImageAndMultipleTextBlockWithAnalysis,
-  SingleImageAndSingleTextBlock,
-  SingleImageAndSingleTextBlockWithAnalysis,
-} from "@/src/common/model/blocks";
+import { ImageBlock, ImageBlockWithAnalysis } from "@/src/common/model/blocks";
 import {
   ImageAnalysis,
   imageAnalysisModel,
@@ -16,15 +7,6 @@ import { OpenaiClient } from "@/src/server/openai-client/openai-client";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 
 export interface ImageAnalyzer {
-  analyzeMultipleImageAndSingleTextBlock(
-    block: MultipleImageAndSingleTextBlock
-  ): Promise<MultipleImageAndSingleTextBlockWithAnalysis>;
-  analyzeSingleImageAndMultipleTextBlock(
-    block: SingleImageAndMultipleTextBlock
-  ): Promise<SingleImageAndMultipleTextBlockWithAnalysis>;
-  analyzeSingleImageAndSingleTextBlock(
-    block: SingleImageAndSingleTextBlock
-  ): Promise<SingleImageAndSingleTextBlockWithAnalysis>;
   analyzeImageBlock(imageBlock: ImageBlock): Promise<ImageBlockWithAnalysis>;
   analyzeImage(imageSrc: string): Promise<ImageAnalysis>;
 }
@@ -34,46 +16,6 @@ export class ImageAnalyzerImpl implements ImageAnalyzer {
 
   constructor() {
     this.openaiClient = new OpenaiClient();
-  }
-
-  async analyzeMultipleImageAndSingleTextBlock(
-    block: MultipleImageAndSingleTextBlock
-  ): Promise<MultipleImageAndSingleTextBlockWithAnalysis> {
-    const analyzedImageBlocks = await Promise.all(
-      block.imageBlocks.map(async (imageBlock) => {
-        const analyzedImageBlock = await this.analyzeImageBlock(imageBlock);
-        return analyzedImageBlock;
-      })
-    );
-
-    block.imageBlocks = analyzedImageBlocks;
-
-    return {
-      ...block,
-      imageBlocks: analyzedImageBlocks,
-    };
-  }
-
-  async analyzeSingleImageAndSingleTextBlock(
-    block: SingleImageAndSingleTextBlock
-  ): Promise<SingleImageAndSingleTextBlockWithAnalysis> {
-    const analyzedImageBlock = await this.analyzeImageBlock(block.imageBlock);
-    block.imageBlock = analyzedImageBlock;
-    return {
-      ...block,
-      imageBlock: analyzedImageBlock,
-    };
-  }
-
-  async analyzeSingleImageAndMultipleTextBlock(
-    block: SingleImageAndMultipleTextBlock
-  ): Promise<SingleImageAndMultipleTextBlockWithAnalysis> {
-    const analyzedImageBlock = await this.analyzeImageBlock(block.imageBlock);
-    block.imageBlock = analyzedImageBlock;
-    return {
-      ...block,
-      imageBlock: analyzedImageBlock,
-    };
   }
 
   async analyzeImageBlock(

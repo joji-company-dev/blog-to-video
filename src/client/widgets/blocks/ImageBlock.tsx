@@ -124,9 +124,10 @@ export function EditableImageBlock({
             <span className="text-muted-foreground">duration(초):</span>{" "}
             <Input
               type="number"
+              step={0.1}
               value={block.duration}
               onChange={(e) => {
-                onChange?.({ ...block, duration: parseInt(e.target.value) });
+                onChange?.({ ...block, duration: parseFloat(e.target.value) });
               }}
             />
           </div>
