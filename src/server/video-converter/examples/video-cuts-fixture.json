@@ -1,0 +1,31 @@
+{
+  "cuts": [
+    {
+      "id": "cut-001",
+      "sceneId": "scene-001",
+      "duration": 5,
+      "imageUrl": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1920",
+      "header": "속초 리모델링 사례",
+      "subtitle": "언니가 운영하던 오래된 슐집이에요.\n처음엔 그냥 바닥만 리뉴얼할 생각이었죠",
+      "footer": "@훈인테리어"
+    },
+    {
+      "id": "cut-002",
+      "sceneId": "scene-001",
+      "duration": 5,
+      "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1920",
+      "header": "속초 카페 리모델링",
+      "subtitle": "20년된 건물이라 바닥, 벽, 천장까지\n모두 손봐야 했습니다",
+      "footer": "@훈인테리어"
+    },
+    {
+      "id": "cut-003",
+      "sceneId": "scene-001",
+      "duration": 5,
+      "imageUrl": "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?q=80&w=1920",
+      "header": "완성된 모습",
+      "subtitle": "작업 기간: 3주\n총 예산: 2800만원",
+      "footer": "@훈인테리어"
+    }
+  ]
+}
