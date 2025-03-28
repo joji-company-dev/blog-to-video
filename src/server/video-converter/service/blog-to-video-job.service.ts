@@ -91,7 +91,7 @@ export class BlogToVideoJobService {
       id: uuidv4(),
       sceneId,
       duration,
-      text,
+      subtitle: text,
     };
   }
 
