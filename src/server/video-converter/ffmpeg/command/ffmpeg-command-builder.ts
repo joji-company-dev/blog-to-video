@@ -123,11 +123,48 @@ export class FFmpegCommandBuilder {
   /**
    * 리사이즈 필터를 추가합니다.
    */
-  withResizeFilter(): this {
+  withResizeFilterWithScaleUp(): this {
     const { width, height } = this.#options.resolution;
 
-    // 리사이즈 필터 문자열 생성
-    const scaleFilter = `scale=w='min(${width},iw)':h='min(${height},ih)',setsar=1`;
+    // 정사각형 크기 계산 (비디오 높이에 맞춤)
+    const squareSize = Math.min(height, width);
+
+    // 이미지를 squareSize x squareSize 크기로 스케일링
+    const scaleFilter = `scale=${squareSize}:${squareSize}`;
+
+    // 1:1 비율로 이미지 조정 필터
+    // 원본 이미지를 먼저 정사각형으로 잘라내고
+    const cropFilter = `crop=${squareSize}:${squareSize}:(${width}-${squareSize})/2:(${height}-${squareSize})/2`;
+
+    // 비디오 프레임 중앙에 배치
+    const padFilter = `pad=${width}:${height}:(${width}-${squareSize})/2:(${height}-${squareSize})/2`;
+
+    this.#videoFilters.push(cropFilter);
+    this.#videoFilters.push(scaleFilter);
+    this.#videoFilters.push(padFilter);
+
+    // libx264 코덱을 사용하는 경우 자동으로 짝수 크기 조정
+    if (this.#options.renderOptions.videoCodec === "libx264") {
+      this.#logger.verbose("libx264 코덱 감지: 이미지를 짝수 크기로 조정");
+      this.#videoFilters.push("scale=trunc(iw/2)*2:trunc(ih/2)*2");
+    }
+
+    return this;
+  }
+
+  /**
+   * 리사이즈 필터를 추가합니다.
+   */
+  withResizeFilterWithNoScaleUp(): this {
+    const { width, height } = this.#options.resolution;
+
+    // 정사각형 크기 계산 (비디오 높이에 맞춤)
+    const squareSize = Math.min(height, width);
+
+    // 원본 이미지가 더 작은 경우에는 원본 크기 유지
+    const scaleFilter = `scale='min(${squareSize},iw)':'min(${squareSize},ih)':force_original_aspect_ratio=decrease`;
+
+    // 이미지 중앙 정렬을 위한 패딩
     const padFilter = `pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2`;
 
     this.#videoFilters.push(scaleFilter);

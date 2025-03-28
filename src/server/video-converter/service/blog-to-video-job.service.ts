@@ -137,7 +137,7 @@ export class BlogToVideoJobService {
       return {
         duration: imageBlock.duration,
         imageUrl: imageBlock.value.src,
-        text: textBlock?.value,
+        subtitle: textBlock?.value,
         id: uuidv4(),
         sceneId: uuidv4(),
       };

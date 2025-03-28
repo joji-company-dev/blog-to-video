@@ -144,7 +144,7 @@ export class FFmpegRenderer {
       .withOutputOptions()
       .withStartListener()
       .withProgressListener()
-      .withResizeFilter();
+      .withResizeFilterWithNoScaleUp();
 
     // 헤더 텍스트 필터 추가 (상단)
     if (cut.header) {
