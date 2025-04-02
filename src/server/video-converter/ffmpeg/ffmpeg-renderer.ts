@@ -144,15 +144,59 @@ export class FFmpegRenderer {
       .withOutputOptions()
       .withStartListener()
       .withProgressListener()
-      .withResizeFilter()
-      .withTextFilter(
-        this.#renderOptions.createTextFilterString(
-          this.#fontPath,
-          cut.text ?? ""
-        )
-      )
-      .applyFilters()
-      .withOutput();
+      .withResizeFilterWithNoScaleUp();
+
+    // 헤더 텍스트 필터 추가 (상단)
+    if (cut.header) {
+      const headerStyle = {
+        ...this.#renderOptions.getOptions().textStyle,
+        position: { x: "(w-text_w)/2", y: "h*0.1" }, // 상단 10% 위치
+        fontSize: 60,
+        fontColor: "white",
+        boxColor: "black@0.6",
+        shadow: { enabled: true, x: 2, y: 2, color: "black@0.5" },
+      };
+
+      this.#renderOptions.setTextStyle(headerStyle);
+      builder.withTextFilter(
+        this.#renderOptions.createTextFilterString(this.#fontPath, cut.header)
+      );
+    }
+
+    // 본문 텍스트 필터 추가 (중앙)
+    if (cut.subtitle) {
+      const subtitleStyle = {
+        ...this.#renderOptions.getOptions().textStyle,
+        position: { x: "(w-text_w)/2", y: "h*0.5" }, // 화면 중앙
+        fontSize: 56,
+        fontColor: "white",
+        boxColor: "black@0.5",
+      };
+
+      this.#renderOptions.setTextStyle(subtitleStyle);
+      builder.withTextFilter(
+        this.#renderOptions.createTextFilterString(this.#fontPath, cut.subtitle)
+      );
+    }
+
+    // 푸터 텍스트 필터 추가 (하단)
+    if (cut.footer) {
+      const footerStyle = {
+        ...this.#renderOptions.getOptions().textStyle,
+        position: { x: "(w-text_w)/2", y: "h*0.9" }, // 하단 10% 위치
+        fontSize: 48,
+        fontColor: "white",
+        boxColor: "black@0.5",
+        shadow: { enabled: true, x: 1, y: 1, color: "black@0.4" },
+      };
+
+      this.#renderOptions.setTextStyle(footerStyle);
+      builder.withTextFilter(
+        this.#renderOptions.createTextFilterString(this.#fontPath, cut.footer)
+      );
+    }
+
+    builder.applyFilters().withOutput();
 
     return builder.execute();
   }

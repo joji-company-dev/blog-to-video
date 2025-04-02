@@ -3,5 +3,7 @@ export interface VideoCut {
   sceneId: string;
   duration: number;
   imageUrl?: string;
-  text?: string;
+  header?: string;
+  subtitle?: string;
+  footer?: string;
 }

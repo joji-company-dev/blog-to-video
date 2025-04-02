@@ -43,7 +43,7 @@ async function renderExample() {
   const videoCut: VideoCut = {
     id: "example-1",
     sceneId: "scene-1",
-    text: "안녕하세요! 맞춤 설정 텍스트입니다.",
+    subtitle: "안녕하세요! 맞춤 설정 텍스트입니다.",
     duration: 5,
     // 이미지가 없으면 검정 배경 사용
     imageUrl: undefined,
@@ -74,7 +74,7 @@ async function renderExample() {
         ...videoCut,
         id: "example-2",
         sceneId: "scene-2",
-        text: "세로 방향 비디오 예시",
+        subtitle: "세로 방향 비디오 예시",
       },
       portraitOutput
     );
